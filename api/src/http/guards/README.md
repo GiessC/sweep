@@ -1,0 +1,2 @@
+# Ok, what is a guard dude?
+Guards perform validations and authorizations specific to each controller. The outcome of these functions is to validate the data being passed to the controller and ensure the user trying to access the controller is authorized to do so.

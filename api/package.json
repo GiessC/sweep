@@ -1,0 +1,39 @@
+{
+    "name": "sweep-api",
+    "version": "0.1.0-alpha",
+    "description": "Express.js API built for the sweep apps.",
+    "main": "dist/app.js",
+    "scripts": {
+        "build": "npx tsc",
+        "start": "NODE_ENV=production node ./dist/app.js",
+        "dev": "NODE_ENV=development nodemon src/index.ts",
+        "local": "NODE_ENV=production nodemon src/index.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/GiessC/sweep.git"
+    },
+    "keywords": [
+        "social",
+        "media",
+        "post"
+    ],
+    "author": "Collin Giess",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/GiessC/sweep/issues"
+    },
+    "homepage": "https://github.com/GiessC/sweep#readme",
+    "dependencies": {
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2"
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.21",
+        "@types/node": "^20.11.0",
+        "concurrently": "^8.2.2",
+        "nodemon": "^3.0.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
+    }
+}
