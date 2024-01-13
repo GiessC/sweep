@@ -53,11 +53,11 @@ Use [this](reference/pr_description.txt) as a template.
 ## Special Thanks
 ### Technologies Used
 #### Web App
-Node.js
-Next.js
-tailwindcss (npm package)
+- Node.js
+- Next.js
+- tailwindcss (npm package)
 
 ### API
-Express.js
-dotenv (npm package)
-pg-promise (npm package)
+- Express.js
+- dotenv (npm package)
+- pg-promise (npm package)
