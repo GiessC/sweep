@@ -34,7 +34,7 @@ We invite you to [contribute](#how-to-contribute) or watch our progress! Thanks!
 18. a. If you are finished with your additions, click **Create pull request**
 <br />b. If you are not finished with your additions, click the down arrow to the right of **Create pull request**, then click **Create draft pull request**. Finally, click **Draft pull request**
 19. If you did not use WIP, skip to step 21
-20. If you used WIP and created a draft pull request, go to your pull request and click **Ready to review** when you are finished with your additions.
+20. If you used WIP and created a draft pull request, go to your pull request, remove the **WIP** label, remove `[WIP]` from your title, and click **Ready to review** when you are finished with your additions.
 21. You are done. Someone (or more than one) will review your pull request and may prompt you for explanations or offer feedback. Once you have resolved all useful suggestions and you have been approved, you are free to merge your pull request in (this will be automatic in the future)
 
 ### Pull Request (PR) Title
