@@ -40,7 +40,6 @@ const port: number = isNaN(Number(process.env.PORT))
     : Number(process.env.PORT);
 
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
-
 app.use('/post', posts);
 
 app.listen(port, () => {
