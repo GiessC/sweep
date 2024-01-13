@@ -1,0 +1,18 @@
+<!-- This is a comment, this will not be seen in markdown, but please remove comments when you are done. -->
+<!-- If you see brackets '{' or '}' surrounding something, you should replace it with the input it describes -->
+<!-- Ex. if it says `# {featureTitle}`, and your feature title is 'UI Data Table', then you should put `# UI Data Table` -->
+<!-- Answer all questions and provide explanations -->
+# {featureTitle}
+
+## Is there a GitHub issue open for this? Please provide it
+<!-- Remove whatever line you don't use below -->
+Yes. Closes #{issueNumber}
+No.
+
+## Why is this feature necessary?
+
+## Provide any explanations for significant engineering choices
+
+## Did you install/update/remove any packages?
+
+## Other comments/notes
