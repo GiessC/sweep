@@ -1,4 +1,4 @@
-<!-- This is a comment, this will not be seen in markdown, but please remove comments when you are done. -->
+<!-- This is a comment, this will not be displayed. -->
 <!-- If you see brackets '{' or '}' surrounding something, you should replace it with the input it describes -->
 <!-- Ex. if it says `# {featureTitle}`, and your feature title is 'UI Data Table', then you should put `# UI Data Table` -->
 <!-- Answer all questions and provide explanations -->
