@@ -1,11 +1,13 @@
 import dotenv from 'dotenv';
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { version } from '../package.json';
+import posts from './routes/Post';
 
 const swaggerOptions: swaggerJSDoc.Options = {
     definition: {
+        openapi: '3.0.0',
         info: {
             title: 'Sweep API',
             version,
@@ -19,17 +21,10 @@ const swaggerOptions: swaggerJSDoc.Options = {
                 url: 'https://opensource.org/licenses/MIT',
             },
         },
-        basePath: '/api',
-        consumes: ['application/json'],
-        host: 'localhost:5000',
-        produces: ['application/json'],
-        schemes: ['http', 'https'],
-        swagger: '2.0',
     },
-    apis: ['app.ts'],
-    swaggerDefinition: {},
+    apis: ['./src/routes/*.ts'],
 };
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const openapiSpecification = swaggerJSDoc(swaggerOptions);
 
 if (process.env.NODE_ENV == 'local') {
     dotenv.config({ path: '.env.local' });
@@ -44,21 +39,9 @@ const port: number = isNaN(Number(process.env.PORT))
     ? 5000
     : Number(process.env.PORT);
 
-/**
- * @swagger
- * /:
- *   get:
- *     description: Hello World
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
- */
-app.get('/', async (request: Request, response: Response) => {
-    // await new PostRepository().getAll();
-    response.send('Hello World!');
-});
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
 
-app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/post', posts);
 
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
