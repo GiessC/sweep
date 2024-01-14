@@ -13,7 +13,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_cognito_user_pool" "sweep_users" {
+resource "aws_cognito_user_pool" "sweep-users" {
   name                = "sweep-users"
   deletion_protection = "INACTIVE"
 
@@ -65,9 +65,62 @@ resource "aws_cognito_user_pool" "sweep_users" {
     enabled = true
   }
 
+  # Schema
+  schema {
+    name                     = "preferred_username"
+    attribute_data_type      = "String"
+    developer_only_attribute = false
+    mutable                  = true
+    required                 = true
+    string_attribute_constraints {
+      min_length = 3
+      max_length = 25
+    }
+  }
+
   # Tags
   tags = {
     app     = "sweep"
-    service = "api"
+    service = "web"
   }
+}
+
+resource "aws_cognito_user_pool_client" "sweep-client" {
+  name         = "sweep-client"
+  user_pool_id = aws_cognito_user_pool.sweep-users.id
+
+  generate_secret = true
+
+  prevent_user_existence_errors = "ENABLED"
+
+  # Tokens
+  auth_session_validity   = 3
+  access_token_validity   = 1
+  refresh_token_validity  = 1
+  enable_token_revocation = true
+
+  # Auth
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile"]
+  explicit_auth_flows = [
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+  ]
+
+  # URLs
+  logout_urls   = ["http://localhost:3000/logout"]
+  callback_urls = ["http://localhost:3000/callback"]
+
+  # Attributes
+  read_attributes  = ["preferred_username", "email"]
+  write_attributes = ["preferred_username", "email"]
+
+  # Misc
+  enable_propagate_additional_user_context_data = true
+}
+
+resource "aws_cognito_user_pool_domain" "sweep-domain" {
+  domain       = "sweep"
+  user_pool_id = aws_cognito_user_pool.sweep-users.id
 }
