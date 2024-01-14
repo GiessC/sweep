@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express, { Express } from 'express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import { SwaggerContact } from '../config/config.json';
 import { version } from '../package.json';
 import posts from './routes/Post';
 
@@ -11,10 +12,7 @@ const swaggerOptions: swaggerJSDoc.Options = {
         info: {
             title: 'Sweep API',
             version,
-            contact: {
-                email: 'giesscollin@gmail.com',
-                name: 'Collin Giess',
-            },
+            contact: SwaggerContact,
             description: 'API for the sweep social media apps',
             license: {
                 name: 'MIT',
