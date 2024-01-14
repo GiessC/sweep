@@ -1,1 +1,3 @@
-export default interface Model {}
+export default interface Model {
+    [key: string]: unknown;
+}
