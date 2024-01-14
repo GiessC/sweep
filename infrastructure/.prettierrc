@@ -1,0 +1,10 @@
+{
+  "overrides": [
+    {
+      "files": "*.tf",
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}
