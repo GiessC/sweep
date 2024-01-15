@@ -1,3 +1,5 @@
+import './globals.css';
+import Navbar from '@/components/Navbar';
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 export const metadata = {
@@ -12,9 +14,12 @@ export default function RootLayout({
 }) {
     return (
         <html lang='en'>
-            <UserProvider>
-                <body>{children}</body>
-            </UserProvider>
+            <body className='w-screen h-screen'>
+                <div className='flex flex-col'>
+                    <Navbar />
+                    {children}
+                </div>
+            </body>
         </html>
     );
 }
