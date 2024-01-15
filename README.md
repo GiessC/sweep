@@ -61,3 +61,6 @@ Use [this](reference/pr_description.txt) as a template.
 - Express.js
 - dotenv (npm package)
 - pg-promise (npm package)
+- kysely
+- prisma-kysely
+- Prisma
