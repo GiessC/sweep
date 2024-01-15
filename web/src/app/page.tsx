@@ -1,9 +1,11 @@
-import Root from './root';
+import Link from 'next/link';
 
-const Page = () => (
-    <main className='flex min-h-screen flex-col items-center justify-between p-24'>
-        <Root />
-    </main>
-);
+const Home = () => {
+    return (
+        <main className='flex min-h-screen flex-col items-center justify-between p-24'>
+            <Link href='/api/auth/login'>Login</Link>
+        </main>
+    );
+};
 
-export default Page;
+export default Home;
