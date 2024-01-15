@@ -1,7 +1,5 @@
-import { IDatabase } from 'pg-promise';
 import IRead from './interfaces/IRead';
 import IWrite from './interfaces/IWrite';
-import { IClient } from 'pg-promise/typescript/pg-subset';
 
 export default abstract class Repository<T> implements IWrite<T>, IRead<T> {
     create(item: T): Promise<boolean> {
