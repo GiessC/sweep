@@ -7,7 +7,6 @@
     "htmlWhitespaceSensitivity": "css",
     "insertPragma": false,
     "jsxSingleQuote": true,
-    "overrides": [],
     "parser": "typescript",
     "plugins": [],
     "pluginSearchDirs": [],
