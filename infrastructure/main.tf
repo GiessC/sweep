@@ -135,26 +135,6 @@ resource "aws_cognito_user_pool_ui_customization" "sweep-customization" {
   user_pool_id = aws_cognito_user_pool.sweep-users.id
 }
 
-variable "sso_redirect_binding_uri" {
-  type = string
-}
-
-resource "aws_cognito_identity_provider" "saml_provider" {
-  user_pool_id  = aws_cognito_user_pool.sweep-users.id
-  provider_name = "SAML"
-  provider_type = "SAML"
-
-  provider_details = {
-    MetadataFile          = filebase64("saml-metadata.xml")
-    SSORedirectBindingURI = var.sso_redirect_binding_uri
-  }
-
-  attribute_mapping = {
-    email              = "email"
-    preferred_username = "preferred_username"
-  }
-}
-
 variable "google_client_id" {
   type = string
 }
