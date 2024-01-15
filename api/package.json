@@ -5,9 +5,9 @@
     "main": "dist/app.js",
     "scripts": {
         "build": "npx tsc",
-        "start": "NODE_ENV=production node ./dist/app.js",
-        "dev": "NODE_ENV=development nodemon src/index.ts",
-        "local": "NODE_ENV=production nodemon src/index.ts"
+        "start": "cross-env NODE_ENV=production node ./dist/app.js",
+        "dev": "cross-env NODE_ENV=development nodemon src/index.ts",
+        "local": "cross-env NODE_ENV=local nodemon src/index.ts"
     },
     "repository": {
         "type": "git",
@@ -27,13 +27,17 @@
     "dependencies": {
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
-        "pg-promise": "^11.5.4"
+        "pg-promise": "^11.5.4",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.0"
     },
     "devDependencies": {
         "@types/express": "^4.17.21",
         "@types/node": "^20.11.0",
-        "@types/pg-promise": "^5.4.3",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.6",
         "concurrently": "^8.2.2",
+        "cross-env": "^7.0.3",
         "nodemon": "^3.0.2",
         "ts-node": "^10.9.2",
         "typescript": "^5.3.3"
