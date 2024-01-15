@@ -27,7 +27,7 @@ const openapiSpecification = swaggerJSDoc(swaggerOptions);
 if (process.env.NODE_ENV == 'local') {
     dotenv.config({ path: '.env.local' });
 } else if (process.env.NODE_ENV == 'production') {
-    dotenv.config({ path: '.env' });
+    dotenv.config({ path: '.env.production' });
 } else {
     dotenv.config({ path: '.env.development' });
 }
