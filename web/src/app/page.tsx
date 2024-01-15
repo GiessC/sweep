@@ -1,9 +1,7 @@
-import Root from './root';
-
-const Page = () => (
+const Home = () => (
     <main className='flex min-h-screen flex-col items-center justify-between p-24'>
-        <Root />
+        <div>Test</div>
     </main>
 );
 
-export default Page;
+export default Home;
