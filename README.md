@@ -55,12 +55,15 @@ Use [this](reference/pr_description.txt) as a template.
 #### Web App
 - Node.js
 - Next.js
-- tailwindcss (npm package)
+- tailwindcss
 
 ### API
 - Express.js
-- dotenv (npm package)
-- pg-promise (npm package)
+- cors
+- dotenv
+- pg-promise
+- postgres
 - kysely
-- prisma-kysely
+- kysely-postgres-js
 - Prisma
+- prisma-kysely

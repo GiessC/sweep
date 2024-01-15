@@ -1,14 +1,25 @@
-import pgPromise from 'pg-promise';
-import { IConnectionParameters } from 'pg-promise/typescript/pg-subset';
+import { Kysely, LogEvent } from 'kysely';
+import { PostgresJSDialect } from 'kysely-postgres-js';
+import postgres from 'postgres';
+import { DB } from './types';
 
-const options: pgPromise.IInitOptions = {};
+const db = new Kysely<DB>({
+    dialect: new PostgresJSDialect({
+        postgres: postgres({
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            host: process.env.DB_HOST,
+            port: Number(process.env.DB_PORT),
+            max: 10,
+        }),
+    }),
+    log(event: LogEvent): void {
+        if (event.level === 'error') {
+            console.error(event.error);
+        }
+    },
+    plugins: [],
+});
 
-const pgp = pgPromise(options);
-const connection: IConnectionParameters = {
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    port: Number(process.env.DB_PORT),
-};
-export default pgp(connection);
+export default db;
