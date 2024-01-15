@@ -85,11 +85,17 @@ resource "aws_cognito_user_pool" "sweep-users" {
   }
 }
 
+resource "aws_cognito_user_pool_domain" "sweep-domain" {
+  domain       = "sweep"
+  user_pool_id = aws_cognito_user_pool.sweep-users.id
+}
+
 resource "aws_cognito_user_pool_client" "sweep-client" {
   name         = "sweep-client"
   user_pool_id = aws_cognito_user_pool.sweep-users.id
 
-  generate_secret = true
+  supported_identity_providers = [aws_cognito_identity_provider.google_provider.provider_name]
+  generate_secret              = true
 
   prevent_user_existence_errors = "ENABLED"
 
@@ -120,7 +126,51 @@ resource "aws_cognito_user_pool_client" "sweep-client" {
   enable_propagate_additional_user_context_data = true
 }
 
-resource "aws_cognito_user_pool_domain" "sweep-domain" {
-  domain       = "sweep"
+resource "aws_cognito_user_pool_ui_customization" "sweep-customization" {
+  client_id = aws_cognito_user_pool_client.sweep-client.id
+
+  css = ".label-customizable {font-weight: 400;}"
+  # image_file = filebase64("logo.png")
+
   user_pool_id = aws_cognito_user_pool.sweep-users.id
+}
+
+variable "sso_redirect_binding_uri" {
+  type = string
+}
+
+resource "aws_cognito_identity_provider" "saml_provider" {
+  user_pool_id  = aws_cognito_user_pool.sweep-users.id
+  provider_name = "SAML"
+  provider_type = "SAML"
+
+  provider_details = {
+    MetadataFile          = filebase64("saml-metadata.xml")
+    SSORedirectBindingURI = var.sso_redirect_binding_uri
+  }
+
+  attribute_mapping = {
+    email              = "email"
+    preferred_username = "preferred_username"
+  }
+}
+
+variable "google_client_id" {
+  type = string
+}
+
+variable "google_client_secret" {
+  type = string
+}
+
+resource "aws_cognito_identity_provider" "google_provider" {
+  user_pool_id  = aws_cognito_user_pool.sweep-users.id
+  provider_name = "Google"
+  provider_type = "Google"
+
+  provider_details = {
+    authorize_scopes = "email"
+    client_id        = var.google_client_id
+    client_secret    = var.google_client_secret
+  }
 }
