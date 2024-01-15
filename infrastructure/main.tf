@@ -85,11 +85,6 @@ resource "aws_cognito_user_pool" "sweep-users" {
   }
 }
 
-resource "aws_cognito_user_pool_domain" "sweep-domain" {
-  domain       = "sweep"
-  user_pool_id = aws_cognito_user_pool.sweep-users.id
-}
-
 resource "aws_cognito_user_pool_client" "sweep-client" {
   name         = "sweep-client"
   user_pool_id = aws_cognito_user_pool.sweep-users.id
@@ -126,6 +121,11 @@ resource "aws_cognito_user_pool_client" "sweep-client" {
   enable_propagate_additional_user_context_data = true
 }
 
+resource "aws_cognito_user_pool_domain" "sweep-domain" {
+  domain       = "sweep"
+  user_pool_id = aws_cognito_user_pool.sweep-users.id
+}
+
 resource "aws_cognito_user_pool_ui_customization" "sweep-customization" {
   client_id = aws_cognito_user_pool_client.sweep-client.id
 
@@ -133,6 +133,8 @@ resource "aws_cognito_user_pool_ui_customization" "sweep-customization" {
   # image_file = filebase64("logo.png")
 
   user_pool_id = aws_cognito_user_pool.sweep-users.id
+
+  depends_on = [aws_cognito_user_pool_domain.sweep-domain]
 }
 
 variable "google_client_id" {
