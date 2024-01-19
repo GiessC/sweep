@@ -1,10 +1,10 @@
 import { database } from '../app';
-import IRead from './interfaces/IRead';
-import IWrite from './interfaces/IWrite';
+import IRead from '../types/IRead';
+import IWrite from '../types/IWrite';
 
 export type Collection = 'Users' | 'Posts';
 
-export default abstract class Repository<T> implements IWrite<T>, IRead<T> {
+export default abstract class PostgresProvider<T> implements IWrite<T>, IRead<T> {
     private readonly _collectionName: Collection;
 
     public constructor(collectionName: Collection) {
@@ -26,8 +26,8 @@ export default abstract class Repository<T> implements IWrite<T>, IRead<T> {
 
     public async update(id: number, item: T): Promise<boolean> {
         try {
-            if (!id || !item) return false;
             const result = await database
+            if (!id || !item) return false;
                 .updateTable(this._collectionName)
                 .set(item)
                 .where('id', '=', id)
