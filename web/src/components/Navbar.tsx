@@ -1,25 +1,20 @@
 'use client';
 
-import LogoutModal from '@/features/logout/LogoutModal';
+import LogoutModal from '@/components/logout/LogoutModal';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const Navbar = () => {
     const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
-    const { user, isLoading, error } = useUser();
+    const { user } = useUser();
 
     const logout = () => {
         setLogoutModalOpen(true);
     };
 
-    useEffect(() => {
-        console.log(user);
-    }, [user]);
-
     return (
         <>
-            <div>{error?.message}</div>
             <div className='w-full h-16 bg-stone-500 fixed top-0'>
                 <div className='container mx-auto px-4 h-full'>
                     <div className='flex justify-between items-center h-full'>
@@ -33,7 +28,7 @@ const Navbar = () => {
                             )}
                             {!!user && (
                                 <li>
-                                    <button onClick={() => logout()}>
+                                    <button onClick={logout}>
                                         <p>Logout</p>
                                     </button>
                                 </li>

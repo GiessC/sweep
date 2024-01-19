@@ -1,4 +1,5 @@
 import {
+    Breakpoint,
     Button,
     Dialog,
     DialogActions,
@@ -9,11 +10,18 @@ import {
 export interface ModalStyles {
     cancelButton?: string;
     confirmButton?: string;
+    Button?: string;
+    Dialog?: string;
+    DialogTitle?: string;
+    DialogContent?: string;
+    DialogActions?: string;
 }
 
 export interface ModalProps {
     title: string;
     isOpen: boolean;
+    cancelDisabled?: boolean;
+    confirmDisabled?: boolean;
     setIsOpen: (isOpen: boolean) => void;
     formId?: string;
     onCancel?: () => void;
@@ -22,12 +30,15 @@ export interface ModalProps {
     confirmButtonText?: string;
     removeConfirmButton?: boolean;
     styles?: ModalStyles;
+    maxWidth?: Breakpoint;
     children: React.ReactNode;
 }
 
 const Modal = ({
     title,
     isOpen,
+    cancelDisabled,
+    confirmDisabled,
     setIsOpen,
     formId,
     onCancel = () => {},
@@ -49,22 +60,26 @@ const Modal = ({
         <Dialog
             open={isOpen}
             onClose={close}
+            className={styles?.Dialog ?? ''}
+            maxWidth='lg'
         >
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>{children}</DialogContent>
             <DialogActions>
                 <Button
-                    className={styles?.confirmButton}
+                    className={`${styles?.cancelButton} ${styles?.Button}`}
                     onClick={handleCancel}
+                    disabled={cancelDisabled}
                 >
                     {cancelButtonText ?? 'Cancel'}
                 </Button>
                 {!removeConfirmButton && (
                     <Button
-                        className={styles?.confirmButton}
+                        className={`${styles?.confirmButton} ${styles?.Button}`}
                         form={formId}
                         type={formId ? 'submit' : 'button'}
                         onClick={() => onConfirm()}
+                        disabled={confirmDisabled}
                     >
                         {confirmButtonText ?? 'Confirm'}
                     </Button>
