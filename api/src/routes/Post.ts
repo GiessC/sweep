@@ -44,10 +44,8 @@ router.get('/', async (request: Request, response: Response) => {
  */
 router.post('/', async (request: Request, response: Response) => {
     const postRepository = new PostRepository();
-    console.log(request.body);
-    const test = await postRepository.create(request.body);
-    console.log(test);
-    response.send('Test');
+    await postRepository.create(request.body);
+    response.sendStatus(200);
 });
 
 export default router;

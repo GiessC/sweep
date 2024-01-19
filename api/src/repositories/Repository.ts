@@ -1,3 +1,4 @@
+import { database } from '../app';
 import IRead from './interfaces/IRead';
 import IWrite from './interfaces/IWrite';
 
@@ -10,32 +11,76 @@ export default abstract class Repository<T> implements IWrite<T>, IRead<T> {
         this._collectionName = collectionName;
     }
 
-    async create(item: T): Promise<void> {
+    public async create(item: T): Promise<void> {
         try {
             if (!item) return;
-            // const result = await db
-            //     .insertInto(this._collectionName)
-            //     .values([item])
-            //     .executeTakeFirst();
-            console.log(item);
+            const result = await database
+                .insertInto(this._collectionName)
+                .values([item])
+                .executeTakeFirst();
+            console.log(item, result);
         } catch (error: unknown) {
             console.log(error);
         }
     }
 
-    update(id: string, item: T): Promise<boolean> {
-        throw new Error('Method not implemented.');
+    public async update(id: number, item: T): Promise<boolean> {
+        try {
+            if (!id || !item) return false;
+            const result = await database
+                .updateTable(this._collectionName)
+                .set(item)
+                .where('id', '=', id)
+                .executeTakeFirst();
+            console.log(item, result);
+            return true;
+        } catch (error: unknown) {
+            console.log(error);
+            return false;
+        }
     }
 
-    delete(id: string): Promise<boolean> {
-        throw new Error('Method not implemented.');
+    public async delete(id: number): Promise<boolean> {
+        try {
+            if (!id) return Promise.resolve(false);
+            const result = await database
+                .deleteFrom(this._collectionName)
+                .where('id', '=', id)
+                .executeTakeFirst();
+            console.log(id, result);
+            return true;
+        } catch (error: unknown) {
+            console.log(error);
+            return false;
+        }
     }
 
-    find(item: T): Promise<T[]> {
-        throw new Error('Method not implemented.');
+    public async findAll(): Promise<T[]> {
+        try {
+            const result = (await database
+                .selectFrom(this._collectionName)
+                .selectAll()
+                .execute()) as T[];
+            console.log(result);
+            return result;
+        } catch (error: unknown) {
+            console.log(error);
+            return [];
+        }
     }
 
-    findOne(id: string): Promise<T> {
-        throw new Error('Method not implemented.');
+    public async findOne(id: number): Promise<T | null> {
+        try {
+            const result = (await database
+                .selectFrom(this._collectionName)
+                .where('id', '=', id)
+                .selectAll()
+                .execute()) as T;
+            console.log(result);
+            return result;
+        } catch (error: unknown) {
+            console.log(error);
+            return null;
+        }
     }
 }

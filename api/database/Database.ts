@@ -1,25 +1,25 @@
-import { Kysely, LogEvent } from 'kysely';
-import { PostgresJSDialect } from 'kysely-postgres-js';
-import postgres from 'postgres';
+import { Kysely, PostgresDialect } from 'kysely';
+import { Pool, PoolConfig } from 'pg';
 import { DB } from './types';
 
-const db = new Kysely<DB>({
-    dialect: new PostgresJSDialect({
-        postgres: postgres({
-            database: process.env.DB_NAME,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            host: process.env.DB_HOST,
-            port: Number(process.env.DB_PORT),
-            max: 10,
-        }),
-    }),
-    log(event: LogEvent): void {
-        if (event.level === 'error') {
-            console.error(event.error);
-        }
-    },
-    plugins: [],
-});
+export default class Database {
+    private static _instance: Database;
+    private database: Kysely<DB>;
 
-export default db;
+    constructor(dbConfig: PoolConfig) {
+        this.database = new Kysely<DB>({
+            dialect: new PostgresDialect({
+                pool: new Pool(dbConfig),
+            }),
+            plugins: [],
+        });
+    }
+
+    public static getInstance(dbConfig: PoolConfig): Kysely<DB> {
+        if (!Database._instance) {
+            Database._instance = new Database(dbConfig);
+        }
+
+        return Database._instance.database;
+    }
+}
