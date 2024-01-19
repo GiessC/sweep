@@ -1,0 +1,30 @@
+generator client {
+    provider = "prisma-kysely"
+
+    // Optionally provide a destination directory for the generated file
+    // and a filename of your choice
+    output = "../database"
+    fileName = "types.ts"
+    // Optionally generate runtime enums to a separate file
+    enumFileName = "enums.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Posts {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  content   String   @db.VarChar(300)
+  authorId  Int
+  author    Users    @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Users {
+  id       Int     @id(map: "User_pkey") @default(autoincrement())
+  username String  @db.VarChar(25)
+  posts    Posts[]
+}
