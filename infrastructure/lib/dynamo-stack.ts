@@ -5,17 +5,17 @@ import {
     Capacity,
     TableV2,
 } from 'aws-cdk-lib/aws-dynamodb';
-import { User } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 export class DynamoStack extends Stack {
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        const dynamoDb = new TableV2(this, 'Post', {
+        new TableV2(this, 'Post', {
+            tableName: 'Sweep-Post',
             billing: Billing.provisioned({
-                readCapacity: Capacity.autoscaled({ maxCapacity: 5 }),
-                writeCapacity: Capacity.autoscaled({ maxCapacity: 5 }),
+                readCapacity: Capacity.autoscaled({ maxCapacity: 10 }),
+                writeCapacity: Capacity.autoscaled({ maxCapacity: 10 }),
             }),
             partitionKey: { name: 'pk', type: AttributeType.STRING },
             globalSecondaryIndexes: [
