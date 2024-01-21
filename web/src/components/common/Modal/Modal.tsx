@@ -1,11 +1,11 @@
 'use client';
 
 import {
-    Breakpoint,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
+    DialogProps,
     DialogTitle,
 } from '@mui/material';
 
@@ -19,7 +19,7 @@ export interface ModalStyles {
     DialogActions?: string;
 }
 
-export interface ModalProps {
+export interface ModalProps extends Omit<DialogProps, 'open'> {
     title: string;
     isOpen: boolean;
     cancelDisabled?: boolean;
@@ -32,7 +32,6 @@ export interface ModalProps {
     confirmButtonText?: string;
     removeConfirmButton?: boolean;
     styles?: ModalStyles;
-    maxWidth?: Breakpoint;
     children: React.ReactNode;
 }
 
@@ -50,6 +49,7 @@ const Modal = ({
     removeConfirmButton = false,
     styles,
     children,
+    ...dialogProps
 }: ModalProps) => {
     const close = () => setIsOpen(false);
 
@@ -58,12 +58,15 @@ const Modal = ({
         close();
     };
 
+    console.log(dialogProps.maxWidth);
+
     return (
         <Dialog
             open={isOpen}
             onClose={close}
             className={styles?.Dialog ?? ''}
-            maxWidth='lg'
+            maxWidth={dialogProps.maxWidth ?? 'md'}
+            {...dialogProps}
         >
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>{children}</DialogContent>
@@ -72,6 +75,7 @@ const Modal = ({
                     className={`${styles?.cancelButton} ${styles?.Button}`}
                     onClick={handleCancel}
                     disabled={cancelDisabled}
+                    size='large'
                 >
                     {cancelButtonText ?? 'Cancel'}
                 </Button>
@@ -82,6 +86,7 @@ const Modal = ({
                         type={formId ? 'submit' : 'button'}
                         onClick={() => onConfirm()}
                         disabled={confirmDisabled}
+                        size='large'
                     >
                         {confirmButtonText ?? 'Confirm'}
                     </Button>

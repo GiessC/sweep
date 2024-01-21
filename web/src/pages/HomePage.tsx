@@ -1,6 +1,6 @@
 'use client';
 
-import CreatePostModal from '@/components/posts/CreatePostModal';
+import CreatePostForm from '@/components/posts/CreatePostForm';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 
@@ -14,7 +14,7 @@ const HomePage = () => {
     return (
         <>
             <Button onClick={createPost}>Create new post</Button>
-            <CreatePostModal
+            <CreatePostForm
                 isOpen={isModalOpen}
                 setIsOpen={setIsModalOpen}
                 onCreate={createPost}
