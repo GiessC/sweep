@@ -6,3 +6,5 @@ export const TYPE = (friendlyName: string, expectedType: string) =>
     `Expected ${expectedType} for ${friendlyName}.`;
 export const ONE_OF = (friendlyNames: string[]) =>
     `Must specify one of: ${friendlyNames.join(', ')}.`;
+export const NOT_FOUND = (friendlyName: string, searchKey: string) =>
+    `No ${friendlyName.toLowerCase()} found with the given ${searchKey}.`;

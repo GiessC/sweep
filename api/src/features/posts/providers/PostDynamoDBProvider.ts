@@ -17,6 +17,7 @@ import PostDto from '../models/dto/PostDto';
 import PostUpdate from '../models/requests/PostUpdate';
 import PostCreate from '../models/requests/PostCreate';
 import { StatusCodes } from 'http-status-codes';
+import DBDate from '../../../services/DBDate';
 
 export default class PostDynamoDBProvider implements IPostDBProvider {
     private static readonly TABLE_NAME = 'Sweep-Post';
@@ -80,7 +81,17 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
             item.title,
             item.content,
         );
-        const updateResponse = await this._dynamoDb.send(
+        const getResponse = await this._dynamoDb.send(
+            new GetItemCommand({
+                TableName: PostDynamoDBProvider.TABLE_NAME,
+                Key: {
+                    pk: { S: PostDto.getPk(id) },
+                },
+            }),
+        );
+        if (!getResponse.Item) return null;
+        const updatedPostDto = mapFromDynamo<PostDto>(getResponse.Item);
+        await this._dynamoDb.send(
             new UpdateItemCommand({
                 TableName: PostDynamoDBProvider.TABLE_NAME,
                 Key: {
@@ -90,19 +101,11 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
                 ExpressionAttributeValues: expressionValues,
             }),
         );
-        const getResponse = await this._dynamoDb.send(
-            new GetItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: { S: PostDto.getPk(id) },
-                },
-            }),
-        );
-        const updatedItem = getResponse.Item;
-        if (updateResponse.$metadata.httpStatusCode === StatusCodes.NOT_FOUND)
-            return null;
-        if (!updatedItem) return null;
-        return mapFromDynamo<PostDto>(updatedItem);
+        updatedPostDto.updatedAt = DBDate.toDBDate(new Date());
+        updatedPostDto.title = item.title ?? updatedPostDto.title;
+        updatedPostDto.content = item.content ?? updatedPostDto.content;
+
+        return updatedPostDto;
     }
 
     public async delete(id: string): Promise<boolean> {

@@ -9,8 +9,8 @@ const MIN_CONTENT_LENGTH = config.Validation.MIN_CONTENT_LENGTH;
 const MAX_CONTENT_LENGTH = config.Validation.MAX_CONTENT_LENGTH;
 
 export const createPostRequestValidators = [
-    body(['title', 'content']).escape(),
     body('title')
+        .escape()
         .isString()
         .withMessage(TYPE('Title', 'string'))
         .notEmpty({ ignore_whitespace: true })
@@ -21,6 +21,7 @@ export const createPostRequestValidators = [
         })
         .withMessage(LENGTH('Title', MIN_TITLE_LENGTH, MAX_TITLE_LENGTH)),
     body('content')
+        .escape()
         .isString()
         .withMessage(TYPE('Content', 'string'))
         .notEmpty({ ignore_whitespace: true })
@@ -37,17 +38,23 @@ export const getAllPostsRequestValidators = [];
 export const getPostRequestValidators = [];
 
 export const updatePostRequestValidators = [
-    body(['title', 'content']).escape(),
     body('title')
+        .optional()
+        .isString()
+        .escape()
         .custom((value, { req }) => {
-            return !!value || !!req.body?.content;
+            return !!value || !!req.body?.title;
         })
         .withMessage(ONE_OF(['Title', 'content']))
         .isLength({
             min: MIN_TITLE_LENGTH,
             max: MAX_TITLE_LENGTH,
-        }),
+        })
+        .withMessage(LENGTH('Title', MIN_TITLE_LENGTH, MAX_TITLE_LENGTH)),
     body('content')
+        .optional()
+        .isString()
+        .escape()
         .custom((value, { req }) => {
             return !!value || !!req.body?.title;
         })
@@ -55,7 +62,8 @@ export const updatePostRequestValidators = [
         .isLength({
             min: MIN_CONTENT_LENGTH,
             max: MAX_CONTENT_LENGTH,
-        }),
+        })
+        .withMessage(LENGTH('Content', MIN_CONTENT_LENGTH, MAX_CONTENT_LENGTH)),
 ];
 
 export const deletePostRequestValidators = [];

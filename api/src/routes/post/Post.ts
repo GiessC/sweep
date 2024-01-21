@@ -21,6 +21,7 @@ import {
     updatePostRequestValidators,
 } from './validators';
 import PostUpdate from '../../features/posts/models/requests/PostUpdate';
+import { NOT_FOUND } from '../../types/ErrorMessages';
 
 const router: Router = Router();
 
@@ -147,7 +148,7 @@ router.get(
         const post: Post | null = await repository.get(request.params.postId);
         if (!post) {
             const body: APIResponseBody<null> = {
-                message: 'No post found with the given postId.',
+                message: NOT_FOUND('Post', 'postId'),
             };
             response.status(StatusCodes.NOT_FOUND).send(body);
             return;
@@ -208,7 +209,7 @@ router.patch(
         );
         if (!post) {
             const body: APIResponseBody<null> = {
-                message: 'No post found with the given postId',
+                message: NOT_FOUND('Post', 'postId'),
             };
             response.status(StatusCodes.BAD_REQUEST).send(body);
             return;
