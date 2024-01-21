@@ -1,34 +1,6 @@
-import { AttributeValue, AttributeValueUpdate } from '@aws-sdk/client-dynamodb';
-import Updateable from '../../../../db/Updateable';
-import DBDate from '../../../../services/DBDate';
-
-class UpdateExpressionBuilder {
-    private expression: string;
-    private expressionAttributeValues: Record<string, AttributeValue>;
-
-    public constructor() {
-        this.expression = '';
-        this.expressionAttributeValues = {};
-    }
-
-    public addExpression(
-        key: string,
-        value: AttributeValue,
-        expression: string,
-    ) {
-        if (!this.expression) {
-            this.expression = `SET ${expression}`;
-            this.expressionAttributeValues[key] = value;
-            return;
-        }
-        this.expression += `, ${expression}`;
-        this.expressionAttributeValues[key] = value;
-    }
-
-    public getExpression(): [string, Record<string, AttributeValue>] {
-        return [this.expression, this.expressionAttributeValues];
-    }
-}
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
+import DBDate from '../../../../mapping/DBDate';
+import UpdateExpressionBuilder from '../../../../models/UpdateExpressionBuilder';
 
 export default class PostUpdate {
     public readonly title?: string;

@@ -17,7 +17,7 @@ import PostDto from '../models/dto/PostDto';
 import PostUpdate from '../models/requests/PostUpdate';
 import PostCreate from '../models/requests/PostCreate';
 import { StatusCodes } from 'http-status-codes';
-import DBDate from '../../../services/DBDate';
+import DBDate from '../../../mapping/DBDate';
 
 export default class PostDynamoDBProvider implements IPostDBProvider {
     private static readonly TABLE_NAME = 'Sweep-Post';

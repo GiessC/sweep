@@ -1,4 +1,4 @@
-import DBDate from '../../../services/DBDate';
+import DBDate from '../../../mapping/DBDate';
 import Post from '../models/domain/Post';
 import PostDto from '../models/dto/PostDto';
 

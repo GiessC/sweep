@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import DBDate from '../../../../services/DBDate';
+import DBDate from '../../../../mapping/DBDate';
 import JsonAble from '../../../../db/JsonAble';
 
 export default class PostDto implements JsonAble {
