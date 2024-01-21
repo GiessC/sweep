@@ -2,5 +2,13 @@
     "SwaggerContact": {
         "name": "Collin Giess",
         "email": "giesscollin@gmail.com"
+    },
+    "Post": {
+        "Validation": {
+            "MIN_TITLE_LENGTH": 1,
+            "MAX_TITLE_LENGTH": 25,
+            "MIN_CONTENT_LENGTH": 1,
+            "MAX_CONTENT_LENGTH": 300
+        }
     }
 }

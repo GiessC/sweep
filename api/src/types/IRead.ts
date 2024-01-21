@@ -1,4 +1,4 @@
 export default interface IRead<T> {
     findAll(): Promise<T[]>;
-    findOne(id: number): Promise<T | null>;
+    findOne(id: string): Promise<T | null>;
 }
