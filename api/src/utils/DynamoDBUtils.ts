@@ -1,6 +1,6 @@
 import { AttributeValue, AttributeValueUpdate } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import Dto from '../db/Dto';
+import JsonAble from '../db/JsonAble';
 
 export const mapFromDynamo = <T>(
     attributes: Record<string, AttributeValue>,
@@ -23,23 +23,4 @@ export const mapToDynamo = <T>(
         removeUndefinedValues: true,
         convertClassInstanceToMap: true,
     });
-};
-
-export const mapToDynamoUpdateExpression = <T>(
-    item: T,
-): [string, Record<string, AttributeValue>] => {
-    let expression = 'SET ';
-    const expressionAttributeValues: Record<string, AttributeValue> = {};
-    const itemAttributes = mapToDynamo<T>(item);
-
-    let flag = false;
-    for (const attribute in itemAttributes) {
-        flag = true;
-        expression += `${attribute} = :${attribute}, `;
-        expressionAttributeValues[`:${attribute}`] = itemAttributes[attribute];
-    }
-
-    if (!flag) return ['', {}];
-
-    return [expression, expressionAttributeValues];
 };

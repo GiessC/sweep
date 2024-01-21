@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import DBDate from '../../../../services/DBDate';
-import Dto from '../../../../db/Dto';
+import JsonAble from '../../../../db/JsonAble';
 
-export default class PostDto implements Dto {
+export default class PostDto implements JsonAble {
     private static PK_PREFIX = 'POST#';
     private static PK_SUFFIX = '';
     private static SK_PREFIX = 'POST';

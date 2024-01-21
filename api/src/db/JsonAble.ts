@@ -1,3 +1,3 @@
-export default interface Dto {
+export default interface JsonAble {
     toJson(): Record<string, unknown>;
 }

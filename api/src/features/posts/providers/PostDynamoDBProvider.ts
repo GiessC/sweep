@@ -3,10 +3,8 @@ import {
     mapToDynamo,
     mapFromDynamoArray,
     mapFromDynamo,
-    mapToDynamoUpdateExpression,
 } from '../../../utils/DynamoDBUtils';
 import {
-    AttributeValue,
     DeleteItemCommand,
     DynamoDB as DynamoDBClient,
     GetItemCommand,
@@ -18,7 +16,6 @@ import IPostDBProvider from './IPostDBProvider';
 import PostDto from '../models/dto/PostDto';
 import PostUpdate from '../models/requests/PostUpdate';
 import PostCreate from '../models/requests/PostCreate';
-import DBDate from '../../../services/DBDate';
 import { StatusCodes } from 'http-status-codes';
 
 export default class PostDynamoDBProvider implements IPostDBProvider {
@@ -79,17 +76,18 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
     }
 
     public async update(id: string, item: PostUpdate): Promise<PostDto | null> {
-        item.updatedAt = DBDate.toDBDate(new Date());
-        const [updateExpression, expressionAttributeValues] =
-            mapToDynamoUpdateExpression<PostUpdate>(item);
-        await this._dynamoDb.send(
+        const [updateExpression, expressionValues] = item.getUpdated(
+            item.title,
+            item.content,
+        );
+        const updateResponse = await this._dynamoDb.send(
             new UpdateItemCommand({
                 TableName: PostDynamoDBProvider.TABLE_NAME,
                 Key: {
                     pk: { S: PostDto.getPk(id) },
                 },
                 UpdateExpression: updateExpression,
-                ExpressionAttributeValues: expressionAttributeValues,
+                ExpressionAttributeValues: expressionValues,
             }),
         );
         const getResponse = await this._dynamoDb.send(
@@ -101,6 +99,8 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
             }),
         );
         const updatedItem = getResponse.Item;
+        if (updateResponse.$metadata.httpStatusCode === StatusCodes.NOT_FOUND)
+            return null;
         if (!updatedItem) return null;
         return mapFromDynamo<PostDto>(updatedItem);
     }
