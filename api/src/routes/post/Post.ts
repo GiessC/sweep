@@ -1,22 +1,21 @@
 import { Request, Response, Router } from 'express';
-import PostRepository from '../repositories/posts/PostRepository';
+import { getPostDBProvider } from '../../features/posts/providers/IPostDBProvider';
+import type IPostRepository from '../../features/posts/repositories/IPostRepository';
+import type APIResponseBody from '../APIResponseBody';
+import PostRepository from '../../features/posts/repositories/PostRepository';
+import Post from '../../features/posts/models/domain/Post';
+import { validationResult } from 'express-validator';
+import { StatusCodes } from 'http-status-codes';
+import { CREATE_SUCCESS, DELETE_SUCCESS } from '../../types/SuccessMessages';
+import {
+    createPostRequestValidators,
+    deletePostRequestValidators,
+    getAllPostsRequestValidators,
+    getPostRequestValidators,
+    updatePostRequestValidators,
+} from './validators';
 
 const router: Router = Router();
-
-/**
- * @openapi
- * /post:
- *   get:
- *     tags:
- *       - posts
- *     description: Hello World
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
- */
-router.get('/', async (request: Request, response: Response) => {
-    response.send('Hello World!');
-});
 
 /**
  * @openapi
@@ -31,21 +30,172 @@ router.get('/', async (request: Request, response: Response) => {
  *         in: body
  *         required: true
  *         type: string
- *       - name: authorId
- *         in: body
- *         required: true
- *         type: integer
  *     tags:
  *       - posts
- *     description: Creates a post
+ *     description: Creates and returns a post
  *     responses:
  *       200:
  *         description: Returns a mysterious string.
  */
-router.post('/', async (request: Request, response: Response) => {
-    const postRepository = new PostRepository();
-    await postRepository.create(request.body);
-    response.sendStatus(200);
-});
+router.post(
+    '/',
+    ...createPostRequestValidators,
+    async (request: Request, response: Response) => {
+        const result = validationResult(request);
+        if (!result.isEmpty()) {
+            const body: APIResponseBody<Post | null> = {
+                message: 'One or more errors occurred',
+                errors: result.array(),
+            };
+            response.status(StatusCodes.BAD_REQUEST).send(body);
+        }
+
+        const repository: IPostRepository = PostRepository.getInstance(
+            getPostDBProvider(),
+        );
+        const post: Post | null = await repository.create({
+            title: request.body.title,
+            content: request.body.content,
+        });
+
+        const body: APIResponseBody<Post | null> = {
+            message: CREATE_SUCCESS('Post'),
+            item: post,
+        };
+        response.status(StatusCodes.OK).send(body);
+    },
+);
+
+/**
+ * @openapi
+ * /post:
+ *   get:
+ *     tags:
+ *       - posts
+ *     description: Gets all posts
+ *     responses:
+ *       200:
+ *         description: Returns a list of all posts
+ */
+router.get(
+    '/',
+    ...getAllPostsRequestValidators,
+    async (request: Request, response: Response) => {
+        const repository: IPostRepository = PostRepository.getInstance(
+            getPostDBProvider(),
+        );
+        const posts = await repository.getAll();
+
+        response.send(posts);
+    },
+);
+
+/**
+ * @openapi
+ * /post/:postId:
+ *   get:
+ *     tags:
+ *       - posts
+ *     description: Gets a post
+ *     responses:
+ *       200:
+ *         description: Returns a single post
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         type: string
+ *         required: true
+ *         description: The UUID ID of the post to get.
+ */
+router.get(
+    '/:postId',
+    ...getPostRequestValidators,
+    async (request: Request, response: Response) => {
+        const repository: IPostRepository = PostRepository.getInstance(
+            getPostDBProvider(),
+        );
+        const post: Post | null = await repository.get(request.params.postId);
+
+        response.send(post);
+    },
+);
+
+/**
+ * @openapi
+ * /post/:postId:
+ *   patch:
+ *     tags:
+ *       - posts
+ *     description: Updates a post
+ *     responses:
+ *       200:
+ *         description: Updates and returns a post.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         type: string
+ *         required: true
+ *         description: The UUID ID of the post to update.
+ *       - in: body
+ *         name: title
+ *         type: string
+ *         description: The updated title of the post.
+ *       - in: body
+ *         name: content
+ *         type: string
+ *         description: The updated content of the post.
+ */
+router.patch(
+    '/:postId',
+    ...updatePostRequestValidators,
+    async (request: Request, response: Response) => {
+        const repository: IPostRepository = PostRepository.getInstance(
+            getPostDBProvider(),
+        );
+        const post: Post | null = await repository.update(
+            request.params.postId,
+            {
+                title: request.body.title,
+                content: request.body.content,
+            },
+        );
+
+        response.send(post);
+    },
+);
+
+/**
+ * @openapi
+ * /post/:postId:
+ *   delete:
+ *     tags:
+ *       - posts
+ *     description: Deletes a post
+ *     responses:
+ *       200:
+ *         description: Deletes a post.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         type: string
+ *         required: true
+ *         description: The UUID ID of the post to delete.
+ */
+router.delete(
+    '/:postId',
+    ...deletePostRequestValidators,
+    async (request: Request, response: Response) => {
+        const repository: IPostRepository = PostRepository.getInstance(
+            getPostDBProvider(),
+        );
+        const deleted: boolean = await repository.delete(request.params.postId);
+
+        const body: APIResponseBody<boolean> = {
+            message: DELETE_SUCCESS('Post'),
+            item: deleted,
+        };
+        response.status(StatusCodes.OK).send(body);
+    },
+);
 
 export default router;

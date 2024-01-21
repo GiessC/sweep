@@ -7,7 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import { SwaggerContact } from '../config/config.json';
 import Database from '../database/Database';
 import { version } from '../package.json';
-import posts from './routes/Post';
+import postsRouter from './routes/post/Post';
 
 const swaggerOptions: swaggerJSDoc.Options = {
     definition: {
@@ -54,7 +54,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
-app.use('/post', posts);
+app.use('/post', postsRouter);
 
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
