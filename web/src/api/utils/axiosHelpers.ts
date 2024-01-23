@@ -1,8 +1,11 @@
-import axios, { AxiosHeaders, AxiosResponse } from 'axios';
-import { getBaseUrl } from './getBaseUrl';
+import axios, { AxiosHeaders, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ApiURL } from '../../../config/settings.json';
 
-const axiosConfig = (body?: unknown, headers?: AxiosHeaders) => ({
-    // baseURL: getBaseUrl(),
+const axiosConfig = (
+    body?: unknown,
+    headers?: AxiosHeaders,
+): AxiosRequestConfig => ({
+    // baseURL: ApiURL,
     data: body,
     headers: {
         ...headers,
@@ -14,10 +17,7 @@ export const axiosGet = <T>(
     body?: unknown,
     headers?: AxiosHeaders,
 ): Promise<AxiosResponse<T>> => {
-    return axios.get<T>(
-        `${getBaseUrl()}${endpoint}`,
-        axiosConfig(body, headers),
-    );
+    return axios.get<T>(`${ApiURL}${endpoint}`, axiosConfig(body, headers));
 };
 
 export const axiosPost = <T>(
@@ -25,10 +25,7 @@ export const axiosPost = <T>(
     body?: unknown,
     headers?: AxiosHeaders,
 ): Promise<AxiosResponse<T>> => {
-    return axios.post<T>(
-        `${getBaseUrl()}${endpoint}`,
-        axiosConfig(body, headers),
-    );
+    return axios.post<T>(`${ApiURL}${endpoint}`, axiosConfig(body, headers));
 };
 
 export const axiosPatch = <T>(
@@ -36,10 +33,7 @@ export const axiosPatch = <T>(
     body?: unknown,
     headers?: AxiosHeaders,
 ): Promise<AxiosResponse<T>> => {
-    return axios.patch<T>(
-        `${getBaseUrl()}${endpoint}`,
-        axiosConfig(body, headers),
-    );
+    return axios.patch<T>(`${ApiURL}${endpoint}`, axiosConfig(body, headers));
 };
 
 export const axiosDelete = <T>(
@@ -47,8 +41,5 @@ export const axiosDelete = <T>(
     body?: unknown,
     headers?: AxiosHeaders,
 ): Promise<AxiosResponse<T>> => {
-    return axios.delete<T>(
-        `${getBaseUrl()}${endpoint}`,
-        axiosConfig(body, headers),
-    );
+    return axios.delete<T>(`${ApiURL}${endpoint}`, axiosConfig(body, headers));
 };

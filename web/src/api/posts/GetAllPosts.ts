@@ -2,14 +2,19 @@ import Post from '@/models/posts/Post';
 import axios from 'axios';
 import APIResponse from '../APIResponse';
 import GetAllPostsRequest from '@/models/posts/requests/GetAllPostsRequest';
+import ErrorHandler from '../services/ErrorHandler';
 
-const BASE_URL = `${process.env.API_URL}/post`;
+const PATH = '/post';
 
 const GetAllPosts = async (
     request: GetAllPostsRequest,
 ): Promise<APIResponse<Post[]>> => {
-    const response = await axios.patch<APIResponse<Post[]>>(BASE_URL, request);
-    return response.data;
+    try {
+        const response = await axios.patch<APIResponse<Post[]>>(PATH, request);
+        return response.data;
+    } catch (error: unknown) {
+        return ErrorHandler.handleError(error);
+    }
 };
 
 export default GetAllPosts;

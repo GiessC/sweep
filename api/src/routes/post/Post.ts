@@ -63,8 +63,8 @@ router.post(
             getPostDBProvider(),
         );
         const post: Post | null = await repository.create({
-            title: request.body.title,
-            content: request.body.content,
+            title: request.body.data.title,
+            content: request.body.data.content,
         });
 
         const body: APIResponseBody<Post | null> = {

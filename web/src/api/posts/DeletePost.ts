@@ -1,14 +1,19 @@
 import axios from 'axios';
 import APIResponse from '../APIResponse';
 import DeletePostRequest from '@/models/posts/requests/DeletePostRequest';
+import ErrorHandler from '../services/ErrorHandler';
 
-const BASE_URL = `${process.env.API_URL}/post`;
+const PATH = '/post';
 
 const DeletePost = async (
     request: DeletePostRequest,
 ): Promise<APIResponse<boolean>> => {
-    const response = await axios.patch<APIResponse<boolean>>(BASE_URL, request);
-    return response.data;
+    try {
+        const response = await axios.patch<APIResponse<boolean>>(PATH, request);
+        return response.data;
+    } catch (error: unknown) {
+        return ErrorHandler.handleError(error);
+    }
 };
 
 export default DeletePost;

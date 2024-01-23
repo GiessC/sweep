@@ -2,17 +2,22 @@ import Post from '@/models/posts/Post';
 import UpdatePostRequest from '@/models/posts/requests/UpdatePostRequest';
 import axios from 'axios';
 import APIResponse from '../APIResponse';
+import ErrorHandler from '../services/ErrorHandler';
 
-const BASE_URL = `${process.env.API_URL}/post`;
+const PATH = '/post';
 
 const UpdatePost = async (
     request: UpdatePostRequest,
 ): Promise<APIResponse<Post | null>> => {
-    const response = await axios.patch<APIResponse<Post | null>>(
-        `${BASE_URL}/${request.id}`,
-        request,
-    );
-    return response.data;
+    try {
+        const response = await axios.patch<APIResponse<Post | null>>(
+            PATH,
+            request,
+        );
+        return response.data;
+    } catch (error: unknown) {
+        return ErrorHandler.handleError(error);
+    }
 };
 
 export default UpdatePost;

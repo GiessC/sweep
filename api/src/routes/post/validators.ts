@@ -1,7 +1,6 @@
 import { LENGTH, ONE_OF, REQUIRED, TYPE } from '../../types/ErrorMessages';
 import { body } from 'express-validator';
 import { Post as config } from '../../../config/config.json';
-import { ContextRunningOptions } from 'express-validator/src/chain';
 
 const MIN_TITLE_LENGTH = config.Validation.MIN_TITLE_LENGTH;
 const MAX_TITLE_LENGTH = config.Validation.MAX_TITLE_LENGTH;
@@ -9,7 +8,7 @@ const MIN_CONTENT_LENGTH = config.Validation.MIN_CONTENT_LENGTH;
 const MAX_CONTENT_LENGTH = config.Validation.MAX_CONTENT_LENGTH;
 
 export const createPostRequestValidators = [
-    body('title')
+    body('data.title')
         .escape()
         .isString()
         .withMessage(TYPE('Title', 'string'))
@@ -20,7 +19,7 @@ export const createPostRequestValidators = [
             max: MAX_TITLE_LENGTH,
         })
         .withMessage(LENGTH('Title', MIN_TITLE_LENGTH, MAX_TITLE_LENGTH)),
-    body('content')
+    body('data.content')
         .escape()
         .isString()
         .withMessage(TYPE('Content', 'string'))
@@ -38,7 +37,7 @@ export const getAllPostsRequestValidators = [];
 export const getPostRequestValidators = [];
 
 export const updatePostRequestValidators = [
-    body('title')
+    body('data.title')
         .optional()
         .isString()
         .escape()
@@ -51,7 +50,7 @@ export const updatePostRequestValidators = [
             max: MAX_TITLE_LENGTH,
         })
         .withMessage(LENGTH('Title', MIN_TITLE_LENGTH, MAX_TITLE_LENGTH)),
-    body('content')
+    body('data.content')
         .optional()
         .isString()
         .escape()
