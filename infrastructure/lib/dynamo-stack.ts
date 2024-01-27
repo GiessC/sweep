@@ -20,8 +20,12 @@ export class DynamoStack extends Stack {
             partitionKey: { name: 'pk', type: AttributeType.STRING },
             globalSecondaryIndexes: [
                 {
-                    indexName: 'gsi',
+                    indexName: 'gsi-1-pk',
                     partitionKey: { name: 'pk', type: AttributeType.STRING },
+                },
+                {
+                    indexName: 'gsi-1-sk',
+                    partitionKey: { name: 'sk', type: AttributeType.STRING },
                 },
             ],
         });
