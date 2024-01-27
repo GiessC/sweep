@@ -17,11 +17,14 @@ export class DynamoStack extends Stack {
                 readCapacity: Capacity.autoscaled({ maxCapacity: 10 }),
                 writeCapacity: Capacity.autoscaled({ maxCapacity: 10 }),
             }),
+            deletionProtection: false,
             partitionKey: { name: 'pk', type: AttributeType.STRING },
+            sortKey: { name: 'sk', type: AttributeType.STRING },
             globalSecondaryIndexes: [
                 {
                     indexName: 'gsi-1-pk',
                     partitionKey: { name: 'pk', type: AttributeType.STRING },
+                    sortKey: { name: 'sk', type: AttributeType.STRING },
                 },
                 {
                     indexName: 'gsi-1-sk',
