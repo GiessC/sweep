@@ -1,3 +1,3 @@
 export default interface GetPostRequest {
-    id: string;
+    slug: string;
 }

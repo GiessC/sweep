@@ -8,7 +8,7 @@ const MIN_CONTENT_LENGTH = config.Validation.MIN_CONTENT_LENGTH;
 const MAX_CONTENT_LENGTH = config.Validation.MAX_CONTENT_LENGTH;
 
 export const createPostRequestValidators = [
-    body('data.title')
+    body('title')
         .escape()
         .isString()
         .withMessage(TYPE('Title', 'string'))
@@ -19,7 +19,7 @@ export const createPostRequestValidators = [
             max: MAX_TITLE_LENGTH,
         })
         .withMessage(LENGTH('Title', MIN_TITLE_LENGTH, MAX_TITLE_LENGTH)),
-    body('data.content')
+    body('content')
         .escape()
         .isString()
         .withMessage(TYPE('Content', 'string'))
@@ -37,7 +37,7 @@ export const getAllPostsRequestValidators = [];
 export const getPostRequestValidators = [];
 
 export const updatePostRequestValidators = [
-    body('data.title')
+    body('title')
         .optional()
         .isString()
         .escape()
@@ -50,7 +50,7 @@ export const updatePostRequestValidators = [
             max: MAX_TITLE_LENGTH,
         })
         .withMessage(LENGTH('Title', MIN_TITLE_LENGTH, MAX_TITLE_LENGTH)),
-    body('data.content')
+    body('content')
         .optional()
         .isString()
         .escape()

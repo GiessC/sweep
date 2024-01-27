@@ -5,10 +5,12 @@ import {
     mapFromDynamo,
 } from '../../../utils/DynamoDBUtils';
 import {
+    AttributeValue,
     DeleteItemCommand,
     DynamoDB as DynamoDBClient,
     GetItemCommand,
     PutItemCommand,
+    QueryCommand,
     ScanCommand,
     UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -18,6 +20,10 @@ import PostUpdate from '../models/requests/PostUpdate';
 import PostCreate from '../models/requests/PostCreate';
 import { StatusCodes } from 'http-status-codes';
 import DBDate from '../../../mapping/DBDate';
+
+type PostFindOne = {
+    slug: string;
+};
 
 export default class PostDynamoDBProvider implements IPostDBProvider {
     private static readonly TABLE_NAME = 'Sweep-Post';
@@ -38,25 +44,38 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         return mapFromDynamoArray<PostDto>(response.Items);
     }
 
-    public async findOne(id: string): Promise<PostDto | null> {
-        const response = await this._dynamoDb.send(
-            new GetItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: {
-                        S: PostDto.getPk(id),
+    public async findOne({ slug }: PostFindOne): Promise<PostDto | null> {
+        const key = {
+            sk: { S: slug },
+        };
+        try {
+            const response = await this._dynamoDb.send(
+                new GetItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Key: {
+                        sk: { S: slug },
                     },
-                },
-            }),
-        );
-        if (!response.Item) return null;
-        return mapFromDynamo<PostDto>(response.Item);
+                }),
+            );
+            if (!response.Item) return null;
+            return mapFromDynamo<PostDto>(response.Item);
+        } catch (error) {
+            console.log(error);
+            if (
+                error instanceof Error &&
+                error.name === 'ValidationException'
+            ) {
+                console.log('Validation exception');
+            }
+            return null;
+        }
     }
 
     public async create(item: PostCreate): Promise<PostDto | null> {
         const postDto = new PostDto(
             item.title,
             item.content,
+            'GetThisFromJWTToken',
             'GetThisFromJWTToken',
         );
         await this._dynamoDb.send(
@@ -68,7 +87,9 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         const getResponse = await this._dynamoDb.send(
             new GetItemCommand({
                 TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: { pk: { S: PostDto.getPk(postDto.id) } },
+                Key: {
+                    pk: { S: PostDto.getPk(postDto.id) },
+                },
             }),
         );
         const createdItem = getResponse.Item;

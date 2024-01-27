@@ -22,8 +22,10 @@ export default class PostRepository implements IPostRepository {
         return postDtoArrayToDomain(postDtos);
     }
 
-    public async get(id: string): Promise<Post | null> {
-        const postDto: PostDto | null = await this.databaseProvider.findOne(id);
+    public async get(slug: string): Promise<Post | null> {
+        const postDto: PostDto | null = await this.databaseProvider.findOne({
+            slug,
+        });
         if (!postDto) return null;
         return postDtoToDomain(postDto);
     }
@@ -32,6 +34,7 @@ export default class PostRepository implements IPostRepository {
         const postDto = new PostDto(
             request.title,
             request.content,
+            'GetAuthorFromJWTToken',
             'GetAuthorFromJWTToken',
         );
         const newPostDto = await this.databaseProvider.create(postDto);

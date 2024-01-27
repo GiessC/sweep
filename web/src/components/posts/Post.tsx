@@ -1,26 +1,51 @@
-import type Post from '@/models/posts/Post';
-import { Typography } from '@mui/material';
+'use client';
+
+import type IPost from '@/models/posts/Post';
+import TextSafety from '@/services/input/TextSafety';
+import { CardContent, Divider, Typography } from '@mui/material';
+import Card from '@mui/material/Card';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export interface PostProps {
-    post: Post;
+    post: IPost;
 }
 
 const Post = ({ post }: PostProps) => {
+    const router = useRouter();
+
+    const goToPost = () => {
+        router.push(`/posts/${post.slug}`);
+    };
+
     return (
-        <div className='flex flex-col'>
-            <div>
-                <Typography component='h2'>{post.title}</Typography>
-            </div>
-            <div className='flex flex-row'>
-                <div></div>
-                <div>
-                    <Typography component='p'>{post.content}</Typography>
-                </div>
-            </div>
-            <div>
-                <Typography component='sub'>{post.author}</Typography>
-            </div>
-        </div>
+        <Card
+            className='first:mt-8 last:mb-8 cursor-pointer'
+            variant='outlined'
+            onClick={goToPost}
+        >
+            <CardContent className='last:pb-2 p-2'>
+                <Typography variant='h6'>
+                    {TextSafety.fromEscaped(post.title)}
+                </Typography>
+                <Divider orientation='horizontal' />
+                <Typography
+                    className=''
+                    variant='body1'
+                >
+                    {TextSafety.fromEscaped(post.content)}
+                </Typography>
+                <Link
+                    onClick={(event) => {
+                        event.stopPropagation();
+                    }}
+                    className='hover:underline text-gray-500'
+                    href={`/profile/${post.authorId}`}
+                >
+                    {TextSafety.fromEscaped(post.author)}
+                </Link>
+            </CardContent>
+        </Card>
     );
 };
 

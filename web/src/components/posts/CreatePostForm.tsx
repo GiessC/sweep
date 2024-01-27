@@ -1,6 +1,7 @@
 'use client';
 
 import { FormHelperText, Stack, TextField } from '@mui/material';
+import { yupResolver } from '@hookform/resolvers/yup';
 import Modal from '../common/Modal/Modal';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useEffect } from 'react';
@@ -8,6 +9,7 @@ import CreatePostRequest from '@/models/posts/requests/CreatePostRequest';
 import { useCreatePost } from '@/hooks/usePost';
 import Post from '@/models/posts/Post';
 import { APIError } from '@/api/APIResponse';
+import { createPostReqSchema } from '@/config/validationSchema';
 
 export interface CreatePostModalProps {
     isOpen: boolean;
@@ -28,7 +30,12 @@ const CreatePostForm = ({
     onCreate = () => {},
 }: CreatePostModalProps) => {
     const { formState, reset, handleSubmit, register, setError } =
-        useForm<CreatePostRequest>({ defaultValues: DEFAULT_VALUES });
+        useForm<CreatePostRequest>({
+            defaultValues: DEFAULT_VALUES,
+            resolver: yupResolver(createPostReqSchema),
+            reValidateMode: 'onChange',
+            mode: 'onChange',
+        });
     const { isSubmitting, isSubmitSuccessful, errors, isDirty, isValid } =
         formState;
     const createPostMutation = useCreatePost();
@@ -43,7 +50,7 @@ const CreatePostForm = ({
     const updateErrors = (errors: APIError[]) => {
         for (const error of errors) {
             setError(
-                (error.fields[0] ?? 'root.generic') as
+                (error.fields.length > 0 ? error.fields[0] : 'root.generic') as
                     | keyof CreatePostRequest
                     | 'root.generic',
                 {

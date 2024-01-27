@@ -4,7 +4,7 @@ import PostUpdate from '../models/requests/PostUpdate';
 
 export default interface IPostRepository {
     getAll(): Promise<Post[]>;
-    get(id: string): Promise<Post | null>;
+    get(slug: string): Promise<Post | null>;
     create(request: PostCreate): Promise<Post | null>;
     update(id: string, request: PostUpdate): Promise<Post | null>;
     delete(id: string): Promise<boolean>;

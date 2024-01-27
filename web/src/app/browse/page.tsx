@@ -1,18 +1,27 @@
+'use client';
+
+import Post from '@/components/posts/Post';
 import { useGetAllPosts } from '@/hooks/usePost';
-import Post from '@/models/posts/Post';
-import GetAllPostsRequest from '@/models/posts/requests/GetAllPostsRequest';
-import { useState } from 'react';
+import type IPost from '@/models/posts/Post';
+import { Stack } from '@mui/material';
 
 const Browse = () => {
-    const { data: posts, error, isLoading } = useGetAllPosts({});
-    const {} = posts;
+    const { data } = useGetAllPosts();
 
     return (
-        <div>
-            {posts.map((post: Post) => (
-                <Post post={post} />
-            ))}
-        </div>
+        <>
+            <Stack
+                spacing={2}
+                sx={{ marginLeft: 20, marginRight: 20 }}
+            >
+                {data?.items?.map((post: IPost) => (
+                    <Post
+                        key={post.id}
+                        post={post}
+                    />
+                ))}
+            </Stack>
+        </>
     );
 };
 

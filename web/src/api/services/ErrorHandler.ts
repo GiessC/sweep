@@ -1,13 +1,9 @@
-import { AxiosError } from 'axios';
 import APIResponse from '../APIResponse';
 import { UNKNOWN } from '../exceptions/errorMessages';
 
 export default class ErrorHandler {
     public static handleError<T = unknown>(error: unknown): APIResponse<T> {
-        if (error instanceof AxiosError) {
-            console.error(error?.message);
-            return ErrorHandler.handleAxiosError<T>(error);
-        } else if (error instanceof Error) {
+        if (error instanceof Error) {
             console.error(error?.message);
             return ErrorHandler.handleNormalError(error);
         } else {
@@ -49,25 +45,6 @@ export default class ErrorHandler {
                     path: '',
                     type: 'error',
                     value: error,
-                },
-            ],
-        };
-    }
-
-    private static handleAxiosError<T = unknown, D = any>(
-        error: AxiosError<T, D>,
-    ): APIResponse<T> {
-        return {
-            message: error.message,
-            errors: [
-                {
-                    fields: [],
-                    location: 'axios',
-                    msg: error.message,
-                    nestedErrors: [],
-                    path: '',
-                    type: 'axios',
-                    value: error.code,
                 },
             ],
         };

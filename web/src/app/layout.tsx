@@ -23,7 +23,7 @@ export default function Layout({ children }: LayoutProps) {
                     <body className='w-screen h-screen'>
                         <div className='flex flex-col'>
                             <Navbar />
-                            {children}
+                            <div style={{ marginTop: 16 }}>{children}</div>
                         </div>
                     </body>
                 </UserProvider>

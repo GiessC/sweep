@@ -58,8 +58,6 @@ const Modal = ({
         close();
     };
 
-    console.log(dialogProps.maxWidth);
-
     return (
         <Dialog
             open={isOpen}
