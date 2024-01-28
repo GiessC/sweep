@@ -2,7 +2,7 @@ import envConfig from '@/config/env';
 
 const API_URL = envConfig.API.URL;
 
-export const fetchGet = <O>(
+export const fetchGet = <O = undefined>(
     url: string,
     urlParams?: O,
     headers?: Record<string, string>,
@@ -22,7 +22,7 @@ export const fetchGet = <O>(
     );
 };
 
-export const fetchPost = <O>(
+export const fetchPost = <O = undefined>(
     url: string,
     body?: O,
     headers?: Record<string, string>,
@@ -38,7 +38,7 @@ export const fetchPost = <O>(
     });
 };
 
-export const fetchPatch = <O>(
+export const fetchPatch = <O = undefined>(
     url: string,
     body?: O,
     headers?: Record<string, string>,
@@ -54,7 +54,7 @@ export const fetchPatch = <O>(
     });
 };
 
-export const fetchDelete = <O>(
+export const fetchDelete = <O = undefined>(
     url: string,
     body?: O,
     headers?: Record<string, string>,

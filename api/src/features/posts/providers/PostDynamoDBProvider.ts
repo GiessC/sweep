@@ -5,12 +5,10 @@ import {
     mapFromDynamo,
 } from '../../../utils/DynamoDBUtils';
 import {
-    AttributeValue,
     DeleteItemCommand,
     DynamoDB as DynamoDBClient,
     GetItemCommand,
     PutItemCommand,
-    QueryCommand,
     ScanCommand,
     UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
@@ -20,10 +18,6 @@ import PostEdit from '../models/requests/PostEdit';
 import PostCreate from '../models/requests/PostCreate';
 import { StatusCodes } from 'http-status-codes';
 import DBDate from '../../../mapping/DBDate';
-
-type PostFindOne = {
-    slug: string;
-};
 
 const getIdFromSlug = (slug: string) => {
     const slugSplit = slug.split('-u-');
@@ -49,7 +43,7 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         return mapFromDynamoArray<PostDto>(response.Items);
     }
 
-    public async findOne({ slug }: PostFindOne): Promise<PostDto | null> {
+    public async findOne(slug: string): Promise<PostDto | null> {
         const id = getIdFromSlug(slug);
         try {
             const response = await this._dynamoDb.send(

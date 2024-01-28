@@ -9,19 +9,17 @@ const Browse = () => {
     const { data } = useGetAllPosts();
 
     return (
-        <>
-            <Stack
-                spacing={2}
-                sx={{ marginLeft: 20, marginRight: 20 }}
-            >
-                {data?.items?.map((post: IPost) => (
-                    <Post
-                        key={post.id}
-                        post={post}
-                    />
-                ))}
-            </Stack>
-        </>
+        <Stack
+            spacing={2}
+            sx={{ marginLeft: 20, marginRight: 20 }}
+        >
+            {data?.items?.map((post: IPost) => (
+                <Post
+                    key={post.id}
+                    post={post}
+                />
+            ))}
+        </Stack>
     );
 };
 

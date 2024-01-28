@@ -13,4 +13,4 @@ export const ONE_OF = (friendlyNames: string[]) =>
 export const NOT_FOUND = (friendlyName: string, searchKey: string) =>
     `No ${friendlyName.toLowerCase()} found with the given ${searchKey}.`;
 
-export const UNKNOWN = () => `An unknown error occurred.`;
+export const UNKNOWN = () => 'An unknown error occurred.';

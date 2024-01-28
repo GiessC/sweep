@@ -9,7 +9,6 @@ const DeletePost = async (
     request: DeletePostRequest,
 ): Promise<APIResponse<boolean>> => {
     try {
-        console.log(request);
         const response = await fetchDelete<DeletePostRequest>(
             `${PATH}/${request.slug}`,
         );

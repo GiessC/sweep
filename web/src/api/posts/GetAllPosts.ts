@@ -7,7 +7,7 @@ const PATH = '/post';
 
 const GetAllPosts = async (): Promise<APIResponse<Post>> => {
     try {
-        const response = await fetchGet<{}>(PATH, {});
+        const response = await fetchGet(PATH);
         return await response.json();
     } catch (error: unknown) {
         return ErrorHandler.handleError(error);

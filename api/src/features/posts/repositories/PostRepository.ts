@@ -23,9 +23,9 @@ export default class PostRepository implements IPostRepository {
     }
 
     public async get(slug: string): Promise<Post | null> {
-        const postDto: PostDto | null = await this.databaseProvider.findOne({
+        const postDto: PostDto | null = await this.databaseProvider.findOne(
             slug,
-        });
+        );
         if (!postDto) return null;
         return postDtoToDomain(postDto);
     }

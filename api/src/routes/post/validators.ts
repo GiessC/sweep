@@ -36,7 +36,7 @@ export const getAllPostsRequestValidators = [];
 
 export const getPostRequestValidators = [];
 
-export const updatePostRequestValidators = [
+export const editPostRequestValidators = [
     body('title')
         .optional()
         .isString()

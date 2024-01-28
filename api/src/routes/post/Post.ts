@@ -18,7 +18,7 @@ import {
     deletePostRequestValidators,
     getAllPostsRequestValidators,
     getPostRequestValidators,
-    updatePostRequestValidators,
+    editPostRequestValidators,
 } from './validators';
 import PostEdit from '../../features/posts/models/requests/PostEdit';
 import { NOT_FOUND, UNKNOWN } from '../../types/ErrorMessages';
@@ -199,7 +199,7 @@ router.get(
  */
 router.patch(
     '/:slug',
-    ...updatePostRequestValidators,
+    ...editPostRequestValidators,
     async (request: Request, response: Response) => {
         const requestBody = await request.body;
         const result = validationResult(request);
