@@ -1,17 +1,17 @@
 import Post from '@/models/posts/Post';
-import UpdatePostRequest from '@/models/posts/requests/UpdatePostRequest';
+import type EditPostRequest from '@/models/posts/requests/EditPostRequest';
 import APIResponse from '../APIResponse';
 import ErrorHandler from '../services/ErrorHandler';
 import { fetchPatch } from '../utils/fetch';
 
 const PATH = '/post';
 
-const UpdatePost = async (
-    request: UpdatePostRequest,
+const EditPost = async (
+    request: EditPostRequest,
 ): Promise<APIResponse<Post | null>> => {
     try {
-        const response = await fetchPatch<UpdatePostRequest>(
-            PATH,
+        const response = await fetchPatch<EditPostRequest>(
+            `${PATH}/${request.slug}`,
             request,
         );
         return await response.json();
@@ -20,4 +20,4 @@ const UpdatePost = async (
     }
 };
 
-export default UpdatePost;
+export default EditPost;

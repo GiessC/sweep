@@ -11,7 +11,7 @@ const DeletePost = async (
     try {
         console.log(request);
         const response = await fetchDelete<DeletePostRequest>(
-            `${PATH}/${request.id}`,
+            `${PATH}/${request.slug}`,
         );
         return await response.json();
     } catch (error: unknown) {

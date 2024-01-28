@@ -3,7 +3,7 @@ import DBDate from '../../../../mapping/DBDate';
 import JsonAble from '../../../../db/JsonAble';
 
 const generateSlug = (title: string, id: string) => {
-    return `${title.toLocaleLowerCase().split(' ').join('-')}-${id}`;
+    return `${title.toLocaleLowerCase().split(' ').join('-')}-u-${id}`;
 };
 
 export default class PostDto implements JsonAble {

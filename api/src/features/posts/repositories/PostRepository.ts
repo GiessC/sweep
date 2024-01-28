@@ -7,7 +7,7 @@ import IPostDBProvider from '../providers/IPostDBProvider';
 import IPostRepository from './IPostRepository';
 import PostDto from '../models/dto/PostDto';
 import PostCreate from '../models/requests/PostCreate';
-import PostUpdate from '../models/requests/PostUpdate';
+import PostEdit from '../models/requests/PostEdit';
 
 export default class PostRepository implements IPostRepository {
     private static _instance: PostRepository;
@@ -42,14 +42,14 @@ export default class PostRepository implements IPostRepository {
         return postDtoToDomain(newPostDto);
     }
 
-    public async update(id: string, request: PostUpdate): Promise<Post | null> {
-        const newPostDto = await this.databaseProvider.update(id, request);
+    public async edit(slug: string, request: PostEdit): Promise<Post | null> {
+        const newPostDto = await this.databaseProvider.edit(slug, request);
         if (!newPostDto) return null;
         return postDtoToDomain(newPostDto);
     }
 
-    public async delete(id: string): Promise<boolean> {
-        return await this.databaseProvider.delete(id);
+    public async delete(slug: string): Promise<boolean> {
+        return await this.databaseProvider.delete(slug);
     }
 
     public static getInstance(dbProvider: IPostDBProvider): PostRepository {

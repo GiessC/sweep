@@ -26,3 +26,14 @@ export const createPostReqSchema = Yup.object({
         .min(MIN_CONTENT_LENGTH, MIN_LENGTH('Content', MIN_CONTENT_LENGTH))
         .max(MAX_CONTENT_LENGTH, MAX_LENGTH('Content', MAX_CONTENT_LENGTH)),
 });
+export const editPostReqSchema = Yup.object({
+    slug: Yup.string().required(REQUIRED('Slug')),
+    title: Yup.string()
+        .required(REQUIRED('Title'))
+        .min(MIN_TITLE_LENGTH, MIN_LENGTH('Title', MIN_TITLE_LENGTH))
+        .max(MAX_TITLE_LENGTH, MAX_LENGTH('Title', MAX_TITLE_LENGTH)),
+    content: Yup.string()
+        .required(REQUIRED('Content'))
+        .min(MIN_CONTENT_LENGTH, MIN_LENGTH('Content', MIN_CONTENT_LENGTH))
+        .max(MAX_CONTENT_LENGTH, MAX_LENGTH('Content', MAX_CONTENT_LENGTH)),
+});

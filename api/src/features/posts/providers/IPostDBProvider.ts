@@ -3,12 +3,12 @@ import IRead from '../../../types/IRead';
 import IWrite from '../../../types/IWrite';
 import PostDto from '../models/dto/PostDto';
 import PostCreate from '../models/requests/PostCreate';
-import PostUpdate from '../models/requests/PostUpdate';
+import PostEdit from '../models/requests/PostEdit';
 import PostDynamoDBProvider from './PostDynamoDBProvider';
 
 export default interface IPostDBProvider
     extends IRead<PostDto>,
-        IWrite<PostDto, PostCreate, PostUpdate> {}
+        IWrite<PostDto, PostCreate, PostEdit> {}
 
 const DBProviderMap = {
     [DBProvider.DYNAMO_DB]: PostDynamoDBProvider,

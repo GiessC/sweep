@@ -20,7 +20,7 @@ import {
     getPostRequestValidators,
     updatePostRequestValidators,
 } from './validators';
-import PostUpdate from '../../features/posts/models/requests/PostUpdate';
+import PostEdit from '../../features/posts/models/requests/PostEdit';
 import { NOT_FOUND, UNKNOWN } from '../../types/ErrorMessages';
 import ErrorHandler from '../../features/posts/services/ErrorHandler';
 
@@ -184,10 +184,10 @@ router.get(
  *         description: Updates and returns a post.
  *     parameters:
  *       - in: path
- *         name: postId
+ *         name: slug
  *         type: string
  *         required: true
- *         description: The UUID ID of the post to update.
+ *         description: The slug of the post to update.
  *       - in: body
  *         name: title
  *         type: string
@@ -198,7 +198,7 @@ router.get(
  *         description: The updated content of the post.
  */
 router.patch(
-    '/:postId',
+    '/:slug',
     ...updatePostRequestValidators,
     async (request: Request, response: Response) => {
         const requestBody = await request.body;
@@ -214,13 +214,13 @@ router.patch(
         const repository: IPostRepository = PostRepository.getInstance(
             getPostDBProvider(),
         );
-        const post: Post | null = await repository.update(
-            request.params.postId,
-            new PostUpdate(requestBody.title, requestBody.content),
+        const post: Post | null = await repository.edit(
+            request.params.slug,
+            new PostEdit(requestBody.title, requestBody.content),
         );
         if (!post) {
             const body: APIResponseBody<null> = {
-                message: NOT_FOUND('Post', 'postId'),
+                message: NOT_FOUND('Post', 'slug'),
             };
             response.status(StatusCodes.BAD_REQUEST).send(body);
             return;
@@ -246,13 +246,13 @@ router.patch(
  *         description: Deletes a post.
  *     parameters:
  *       - in: path
- *         name: postId
+ *         name: slug
  *         type: string
  *         required: true
- *         description: The UUID ID of the post to delete.
+ *         description: The slug of the post to delete.
  */
 router.delete(
-    '/:postId',
+    '/:slug',
     ...deletePostRequestValidators,
     async (request: Request, response: Response) => {
         const result = validationResult(request);
@@ -267,7 +267,7 @@ router.delete(
         const repository: IPostRepository = PostRepository.getInstance(
             getPostDBProvider(),
         );
-        const deleted: boolean = await repository.delete(request.params.postId);
+        const deleted: boolean = await repository.delete(request.params.slug);
 
         const body: APIResponseBody<boolean> = {
             message: DELETE_SUCCESS('Post'),

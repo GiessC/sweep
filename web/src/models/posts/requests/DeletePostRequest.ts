@@ -1,3 +1,3 @@
 export default interface DeletePostRequest {
-    id: string;
+    slug: string;
 }

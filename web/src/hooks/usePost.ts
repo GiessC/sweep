@@ -1,14 +1,14 @@
 import type APIResponse from '@/api/APIResponse';
 import CreatePost from '@/api/posts/CreatePost';
 import DeletePost from '@/api/posts/DeletePost';
+import EditPost from '@/api/posts/EditPost';
 import GetAllPosts from '@/api/posts/GetAllPosts';
 import GetPost from '@/api/posts/GetPost';
-import UpdatePost from '@/api/posts/UpdatePost';
 import type Post from '@/models/posts/Post';
 import type CreatePostRequest from '@/models/posts/requests/CreatePostRequest';
-import DeletePostRequest from '@/models/posts/requests/DeletePostRequest';
+import type DeletePostRequest from '@/models/posts/requests/DeletePostRequest';
+import type EditPostRequest from '@/models/posts/requests/EditPostRequest';
 import type GetPostRequest from '@/models/posts/requests/GetPostRequest';
-import UpdatePostRequest from '@/models/posts/requests/UpdatePostRequest';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const useCreatePost = () => {
@@ -19,10 +19,10 @@ export const useCreatePost = () => {
     });
 };
 
-export const useUpdatePost = () => {
-    return useMutation<APIResponse<Post | null>, Error, UpdatePostRequest>({
-        mutationFn: (request: UpdatePostRequest) => {
-            return UpdatePost(request);
+export const useEditPost = () => {
+    return useMutation<APIResponse<Post | null>, Error, EditPostRequest>({
+        mutationFn: (request: EditPostRequest) => {
+            return EditPost(request);
         },
     });
 };

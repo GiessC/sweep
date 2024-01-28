@@ -2,39 +2,33 @@ import { useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 import { useDeletePost } from '@/hooks/usePost';
 import Typography from '@mui/material/Typography';
-import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
-import APIResponse from '@/api/APIResponse';
-import type IPost from '@/models/posts/Post';
+import { useRouter } from 'next/navigation';
 
 type DeletePostModalProps = {
-    postId: string;
+    slug: string;
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-    refetch: (
-        options?: RefetchOptions | undefined,
-    ) => Promise<QueryObserverResult<APIResponse<IPost>, Error>>;
 };
 
 const DeletePostModal = ({
-    postId,
+    slug,
     isOpen: deleteModalOpen,
     setIsOpen: setDeleteModalOpen,
-    refetch,
 }: DeletePostModalProps) => {
-    const { mutateAsync, isPending, isError, data, error, isSuccess } =
-        useDeletePost();
+    const router = useRouter();
+    const { mutateAsync, isPending, isSuccess } = useDeletePost();
 
     const deletePost = async () => {
         await mutateAsync({
-            id: postId,
+            slug,
         });
     };
 
     useEffect(() => {
         if (!isSuccess) return;
-        refetch();
         setDeleteModalOpen(false);
-    }, [isSuccess]);
+        router.push('/browse');
+    }, [isSuccess, router, setDeleteModalOpen]);
 
     return (
         <Modal
@@ -55,11 +49,13 @@ const DeletePostModal = ({
             <Typography display='inline'>Are you sure you want to </Typography>
             <Typography
                 display='inline'
-                className='font-bold text-red'
+                className='font-bold text-red-500'
             >
                 delete
             </Typography>{' '}
-            <Typography display='inline'>this post?</Typography>
+            <Typography display='inline'>
+                this post? This action cannot be undone.
+            </Typography>
         </Modal>
     );
 };

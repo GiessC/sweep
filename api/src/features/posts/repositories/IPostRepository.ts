@@ -1,11 +1,11 @@
 import Post from '../models/domain/Post';
 import PostCreate from '../models/requests/PostCreate';
-import PostUpdate from '../models/requests/PostUpdate';
+import PostEdit from '../models/requests/PostEdit';
 
 export default interface IPostRepository {
     getAll(): Promise<Post[]>;
     get(slug: string): Promise<Post | null>;
     create(request: PostCreate): Promise<Post | null>;
-    update(id: string, request: PostUpdate): Promise<Post | null>;
-    delete(id: string): Promise<boolean>;
+    edit(slug: string, request: PostEdit): Promise<Post | null>;
+    delete(slug: string): Promise<boolean>;
 }
