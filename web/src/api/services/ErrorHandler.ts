@@ -1,5 +1,5 @@
 import APIResponse from '../APIResponse';
-import { UNKNOWN } from '../exceptions/ErrorMessages';
+import { UNKNOWN } from '../../errors/ErrorMessages';
 
 export default class ErrorHandler {
     public static handleError<T = unknown>(error: unknown): APIResponse<T> {
