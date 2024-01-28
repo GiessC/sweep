@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import {
     AttributeType,
     Billing,
@@ -31,6 +31,7 @@ export class DynamoStack extends Stack {
                     partitionKey: { name: 'sk', type: AttributeType.STRING },
                 },
             ],
+            removalPolicy: RemovalPolicy.DESTROY,
         });
     }
 }
