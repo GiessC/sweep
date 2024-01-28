@@ -6,10 +6,12 @@ export const postDtoToDomain = (postDto: PostDto): Post =>
     new Post(
         postDto.id,
         postDto.title,
+        postDto.slug,
         postDto.content,
         DBDate.fromDBDate(postDto.createdAt),
         DBDate.fromDBDate(postDto.updatedAt),
         postDto.author,
+        postDto.authorId,
     );
 
 export const postDtoArrayToDomain = (postDtos: PostDto[]): Post[] => {
@@ -21,6 +23,7 @@ export const postToDto = (post: Post): PostDto =>
         post.title,
         post.content,
         post.author,
+        post.authorId,
         post.createdAt,
         post.updatedAt,
     );

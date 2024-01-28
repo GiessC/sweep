@@ -18,10 +18,11 @@ import {
     deletePostRequestValidators,
     getAllPostsRequestValidators,
     getPostRequestValidators,
-    updatePostRequestValidators,
+    editPostRequestValidators,
 } from './validators';
-import PostUpdate from '../../features/posts/models/requests/PostUpdate';
-import { NOT_FOUND } from '../../types/ErrorMessages';
+import PostEdit from '../../features/posts/models/requests/PostEdit';
+import { NOT_FOUND, UNKNOWN } from '../../types/ErrorMessages';
+import ErrorHandler from '../../features/posts/services/ErrorHandler';
 
 const router: Router = Router();
 
@@ -49,6 +50,7 @@ router.post(
     '/',
     ...createPostRequestValidators,
     async (request: Request, response: Response) => {
+        const requestBody = await request.body;
         const result = validationResult(request);
         if (!result.isEmpty()) {
             const body: APIResponseBody<Post | null> = {
@@ -63,8 +65,8 @@ router.post(
             getPostDBProvider(),
         );
         const post: Post | null = await repository.create({
-            title: request.body.title,
-            content: request.body.content,
+            title: requestBody.title,
+            content: requestBody.content,
         });
 
         const body: APIResponseBody<Post | null> = {
@@ -114,23 +116,23 @@ router.get(
 
 /**
  * @openapi
- * /post/:postId:
+ * /post/:slug:
  *   get:
  *     tags:
  *       - posts
- *     description: Gets a post
+ *     description: Gets a post by its slug
  *     responses:
  *       200:
  *         description: Returns a single post
  *     parameters:
  *       - in: path
- *         name: postId
+ *         name: slug
  *         type: string
  *         required: true
- *         description: The UUID ID of the post to get.
+ *         description: The slug ("human-readable id") of the post.
  */
 router.get(
-    '/:postId',
+    '/:slug',
     ...getPostRequestValidators,
     async (request: Request, response: Response) => {
         const result = validationResult(request);
@@ -145,20 +147,28 @@ router.get(
         const repository: IPostRepository = PostRepository.getInstance(
             getPostDBProvider(),
         );
-        const post: Post | null = await repository.get(request.params.postId);
-        if (!post) {
-            const body: APIResponseBody<null> = {
-                message: NOT_FOUND('Post', 'postId'),
-            };
-            response.status(StatusCodes.NOT_FOUND).send(body);
-            return;
-        }
+        try {
+            const post: Post | null = await repository.get(request.params.slug);
+            if (!post) {
+                const body: APIResponseBody<null> = {
+                    message: NOT_FOUND('Post', 'slug'),
+                };
+                response.status(StatusCodes.NOT_FOUND).send(body);
+                return;
+            }
 
-        const body: APIResponseBody<Post> = {
-            message: GET_SUCCESS('Post'),
-            item: post,
-        };
-        response.status(StatusCodes.OK).send(body);
+            const body: APIResponseBody<Post> = {
+                message: GET_SUCCESS('Post'),
+                item: post,
+            };
+            response.status(StatusCodes.OK).send(body);
+        } catch (error: unknown) {
+            ErrorHandler.handleError(error);
+            const body: APIResponseBody<null> = {
+                message: UNKNOWN(),
+            };
+            response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(body);
+        }
     },
 );
 
@@ -174,10 +184,10 @@ router.get(
  *         description: Updates and returns a post.
  *     parameters:
  *       - in: path
- *         name: postId
+ *         name: slug
  *         type: string
  *         required: true
- *         description: The UUID ID of the post to update.
+ *         description: The slug of the post to update.
  *       - in: body
  *         name: title
  *         type: string
@@ -188,9 +198,10 @@ router.get(
  *         description: The updated content of the post.
  */
 router.patch(
-    '/:postId',
-    ...updatePostRequestValidators,
+    '/:slug',
+    ...editPostRequestValidators,
     async (request: Request, response: Response) => {
+        const requestBody = await request.body;
         const result = validationResult(request);
         if (!result.isEmpty()) {
             const body: APIResponseBody<Post | null> = {
@@ -203,13 +214,13 @@ router.patch(
         const repository: IPostRepository = PostRepository.getInstance(
             getPostDBProvider(),
         );
-        const post: Post | null = await repository.update(
-            request.params.postId,
-            new PostUpdate(request.body.title, request.body.content),
+        const post: Post | null = await repository.edit(
+            request.params.slug,
+            new PostEdit(requestBody.title, requestBody.content),
         );
         if (!post) {
             const body: APIResponseBody<null> = {
-                message: NOT_FOUND('Post', 'postId'),
+                message: NOT_FOUND('Post', 'slug'),
             };
             response.status(StatusCodes.BAD_REQUEST).send(body);
             return;
@@ -235,13 +246,13 @@ router.patch(
  *         description: Deletes a post.
  *     parameters:
  *       - in: path
- *         name: postId
+ *         name: slug
  *         type: string
  *         required: true
- *         description: The UUID ID of the post to delete.
+ *         description: The slug of the post to delete.
  */
 router.delete(
-    '/:postId',
+    '/:slug',
     ...deletePostRequestValidators,
     async (request: Request, response: Response) => {
         const result = validationResult(request);
@@ -256,7 +267,7 @@ router.delete(
         const repository: IPostRepository = PostRepository.getInstance(
             getPostDBProvider(),
         );
-        const deleted: boolean = await repository.delete(request.params.postId);
+        const deleted: boolean = await repository.delete(request.params.slug);
 
         const body: APIResponseBody<boolean> = {
             message: DELETE_SUCCESS('Post'),

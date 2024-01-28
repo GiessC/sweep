@@ -1,7 +1,6 @@
 import { LENGTH, ONE_OF, REQUIRED, TYPE } from '../../types/ErrorMessages';
 import { body } from 'express-validator';
 import { Post as config } from '../../../config/config.json';
-import { ContextRunningOptions } from 'express-validator/src/chain';
 
 const MIN_TITLE_LENGTH = config.Validation.MIN_TITLE_LENGTH;
 const MAX_TITLE_LENGTH = config.Validation.MAX_TITLE_LENGTH;
@@ -37,7 +36,7 @@ export const getAllPostsRequestValidators = [];
 
 export const getPostRequestValidators = [];
 
-export const updatePostRequestValidators = [
+export const editPostRequestValidators = [
     body('title')
         .optional()
         .isString()

@@ -14,10 +14,15 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import IPostDBProvider from './IPostDBProvider';
 import PostDto from '../models/dto/PostDto';
-import PostUpdate from '../models/requests/PostUpdate';
+import PostEdit from '../models/requests/PostEdit';
 import PostCreate from '../models/requests/PostCreate';
 import { StatusCodes } from 'http-status-codes';
 import DBDate from '../../../mapping/DBDate';
+
+const getIdFromSlug = (slug: string) => {
+    const slugSplit = slug.split('-u-');
+    return slugSplit[slugSplit.length - 1];
+};
 
 export default class PostDynamoDBProvider implements IPostDBProvider {
     private static readonly TABLE_NAME = 'Sweep-Post';
@@ -38,25 +43,37 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         return mapFromDynamoArray<PostDto>(response.Items);
     }
 
-    public async findOne(id: string): Promise<PostDto | null> {
-        const response = await this._dynamoDb.send(
-            new GetItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: {
-                        S: PostDto.getPk(id),
+    public async findOne(slug: string): Promise<PostDto | null> {
+        const id = getIdFromSlug(slug);
+        try {
+            const response = await this._dynamoDb.send(
+                new GetItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Key: {
+                        pk: { S: PostDto.getPk(id) },
+                        sk: { S: PostDto.getSk(slug) },
                     },
-                },
-            }),
-        );
-        if (!response.Item) return null;
-        return mapFromDynamo<PostDto>(response.Item);
+                }),
+            );
+            if (!response.Item) return null;
+            return mapFromDynamo<PostDto>(response.Item);
+        } catch (error) {
+            console.log(error);
+            if (
+                error instanceof Error &&
+                error.name === 'ValidationException'
+            ) {
+                console.log('Validation exception');
+            }
+            return null;
+        }
     }
 
     public async create(item: PostCreate): Promise<PostDto | null> {
         const postDto = new PostDto(
             item.title,
             item.content,
+            'GetThisFromJWTToken',
             'GetThisFromJWTToken',
         );
         await this._dynamoDb.send(
@@ -68,7 +85,10 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         const getResponse = await this._dynamoDb.send(
             new GetItemCommand({
                 TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: { pk: { S: PostDto.getPk(postDto.id) } },
+                Key: {
+                    pk: { S: PostDto.getPk(postDto.id) },
+                    sk: { S: PostDto.getSk(postDto.slug) },
+                },
             }),
         );
         const createdItem = getResponse.Item;
@@ -76,8 +96,9 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         return mapFromDynamo<PostDto>(createdItem);
     }
 
-    public async update(id: string, item: PostUpdate): Promise<PostDto | null> {
-        const [updateExpression, expressionValues] = item.getUpdated(
+    public async edit(slug: string, item: PostEdit): Promise<PostDto | null> {
+        const id = getIdFromSlug(slug);
+        const [updateExpression, expressionValues] = item.getEdited(
             item.title,
             item.content,
         );
@@ -86,6 +107,7 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
                 TableName: PostDynamoDBProvider.TABLE_NAME,
                 Key: {
                     pk: { S: PostDto.getPk(id) },
+                    sk: { S: PostDto.getSk(slug) },
                 },
             }),
         );
@@ -96,6 +118,7 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
                 TableName: PostDynamoDBProvider.TABLE_NAME,
                 Key: {
                     pk: { S: PostDto.getPk(id) },
+                    sk: { S: PostDto.getSk(slug) },
                 },
                 UpdateExpression: updateExpression,
                 ExpressionAttributeValues: expressionValues,
@@ -108,12 +131,14 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         return updatedPostDto;
     }
 
-    public async delete(id: string): Promise<boolean> {
+    public async delete(slug: string): Promise<boolean> {
+        const id = getIdFromSlug(slug);
         const response = await this._dynamoDb.send(
             new DeleteItemCommand({
                 TableName: PostDynamoDBProvider.TABLE_NAME,
                 Key: {
                     pk: { S: PostDto.getPk(id) },
+                    sk: { S: PostDto.getSk(slug) },
                 },
             }),
         );

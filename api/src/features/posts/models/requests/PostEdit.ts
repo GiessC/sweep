@@ -2,7 +2,7 @@ import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import DBDate from '../../../../mapping/DBDate';
 import UpdateExpressionBuilder from '../../../../models/UpdateExpressionBuilder';
 
-export default class PostUpdate {
+export default class PostEdit {
     public readonly title?: string;
     public readonly content?: string;
 
@@ -11,7 +11,7 @@ export default class PostUpdate {
         this.content = content;
     }
 
-    public getUpdated(
+    public getEdited(
         title?: string,
         content?: string,
     ): [string, Record<string, AttributeValue>] {
