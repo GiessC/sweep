@@ -8,8 +8,10 @@ export interface LoginRequest {
 }
 
 export interface SignUpRequest {
+    email: string;
     username: string;
     password: string;
+    confirmPassword?: string;
 }
 
 export const useAuth = (): IAuthContext => ({
@@ -17,18 +19,22 @@ export const useAuth = (): IAuthContext => ({
         request: LoginRequest,
         redirectToMfa: () => void,
     ): Promise<boolean> => {
-        return await AuthService.login(
+        return await AuthService.getInstance().login(
             request.username,
             request.password,
             redirectToMfa,
         );
     },
     logout: async (): Promise<boolean> => {
-        return await AuthService.logout();
+        return await AuthService.getInstance().logout();
     },
     signUp: async (
         request: SignUpRequest,
     ): Promise<ISignUpResult | undefined> => {
-        return await AuthService.signUp(request.username, request.password);
+        return await AuthService.getInstance().signUp(
+            request.email,
+            request.username,
+            request.password,
+        );
     },
 });

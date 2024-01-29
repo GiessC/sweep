@@ -4,6 +4,7 @@ import {
     AuthenticationDetails,
     CognitoUser,
     CognitoUserPool,
+    CognitoUserAttribute,
     ISignUpResult,
 } from 'amazon-cognito-identity-js';
 
@@ -17,31 +18,36 @@ if (!CLIENT_ID || !USER_POOL_ID) {
 }
 
 export default class AuthService {
-    private static USER_POOL: CognitoUserPool = new CognitoUserPool({
-        ClientId: CLIENT_ID ?? '',
-        UserPoolId: USER_POOL_ID ?? '',
-        // Storage: localStorage, // TODO: Implement a better storage solution
-    });
+    static #INSTANCE: AuthService | null = null;
+    private readonly userPool: CognitoUserPool;
 
-    private static async handleLoginSuccess(resolve: (value: boolean) => void) {
+    public constructor() {
+        this.userPool = new CognitoUserPool({
+            ClientId: CLIENT_ID ?? '',
+            UserPoolId: USER_POOL_ID ?? '',
+            // Storage: localStorage, // TODO: Implement a better storage solution
+        });
+    }
+
+    private async handleLoginSuccess(resolve: (value: boolean) => void) {
         resolve(true);
     }
 
-    private static async handleLoginFailure(
+    private async handleLoginFailure(
         error: unknown,
         reject: (reason?: unknown) => void,
     ) {
         reject(error);
     }
 
-    public static async login(
+    public async login(
         username: string,
         password: string,
         redirectToMfa: () => void,
     ): Promise<boolean> {
         const cognitoUser = new CognitoUser({
             Username: username,
-            Pool: AuthService.USER_POOL,
+            Pool: this.userPool,
         });
         const authenticationDetails = new AuthenticationDetails({
             Username: username,
@@ -49,17 +55,17 @@ export default class AuthService {
         });
         return await new Promise((resolve, reject) => {
             cognitoUser.authenticateUser(authenticationDetails, {
-                onSuccess: () => AuthService.handleLoginSuccess(resolve),
+                onSuccess: () => this.handleLoginSuccess(resolve),
                 onFailure: (error: unknown) =>
-                    AuthService.handleLoginFailure(error, reject),
+                    this.handleLoginFailure(error, reject),
                 mfaRequired: () => redirectToMfa(),
             });
         });
     }
 
-    public static async logout(): Promise<boolean> {
+    public async logout(): Promise<boolean> {
         return await new Promise((resolve, reject) => {
-            const cognitoUser = AuthService.USER_POOL.getCurrentUser();
+            const cognitoUser = this.userPool.getCurrentUser();
             if (!cognitoUser) {
                 reject(
                     new NoAuthenticatedUserError(
@@ -82,15 +88,20 @@ export default class AuthService {
         });
     }
 
-    public static async signUp(
+    public async signUp(
+        email: string,
         username: string,
         password: string,
     ): Promise<ISignUpResult | undefined> {
+        const emailAttribute = new CognitoUserAttribute({
+            Name: 'email',
+            Value: email,
+        });
         return await new Promise((resolve, reject) => {
-            AuthService.USER_POOL.signUp(
+            this.userPool.signUp(
                 username,
                 password,
-                [],
+                [emailAttribute],
                 [],
                 (error?: Error, result?: ISignUpResult) => {
                     if (!!error) {
@@ -101,5 +112,33 @@ export default class AuthService {
                 },
             );
         });
+    }
+
+    public async confirmUser(username: string, code: string): Promise<void> {
+        return await new Promise((resolve, reject) => {
+            const cognitoUser = new CognitoUser({
+                Username: username,
+                Pool: this.userPool,
+            });
+            cognitoUser.confirmRegistration(
+                code,
+                true,
+                (error?: unknown, result?: unknown) => {
+                    if (!!error) {
+                        reject(error);
+                        return;
+                    }
+                    console.log(result);
+                    resolve();
+                },
+            );
+        });
+    }
+
+    public static getInstance(): AuthService {
+        if (!AuthService.#INSTANCE) {
+            AuthService.#INSTANCE = new AuthService();
+        }
+        return AuthService.#INSTANCE;
     }
 }

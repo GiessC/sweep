@@ -10,12 +10,14 @@ export interface IAuthContext {
     ) => Promise<boolean>;
     logout: () => Promise<boolean>;
     signUp: (request: SignUpRequest) => Promise<ISignUpResult | undefined>;
+    confirmUser: (code: string) => Promise<void>;
 }
 
-const AuthContext = createContext<IAuthContext>({
+export const AuthContext = createContext<IAuthContext>({
     login: () => Promise.resolve(false),
     logout: () => Promise.resolve(false),
     signUp: () => Promise.resolve(undefined),
+    confirmUser: () => Promise.resolve(),
 });
 
 export interface AuthProviderProps {

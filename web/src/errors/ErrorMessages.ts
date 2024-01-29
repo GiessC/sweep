@@ -16,4 +16,6 @@ export const ONE_OF = (friendlyNames: string[]) =>
 export const NOT_FOUND = (friendlyName: string, searchKey: string) =>
     `No ${friendlyName.toLowerCase()} found with the given ${searchKey}.`;
 
+export const INVALID_EMAIL = () => 'Please specify a valid email';
+
 export const UNKNOWN = () => `An unknown error occurred.`;

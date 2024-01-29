@@ -3,3 +3,7 @@
 terraform.tfstate
 terraform.tfstate.backup
 cdk.out/
+
+.env
+.env.*
+node_modules/
