@@ -18,6 +18,7 @@ import { AuthContext } from '@/context/AuthContext';
 import { signupReqSchema } from '@/config/validationSchema';
 import { ObjectSchema } from 'yup';
 import { isAWSError } from '@/utils/awsUtils';
+import { setItem } from '@/utils/localStorage';
 
 const SignupForm = () => {
     const router = useRouter();
@@ -44,11 +45,12 @@ const SignupForm = () => {
     const onSubmit = async (formData: SignUpRequest) => {
         try {
             const response = await signUp(formData);
+            setItem('username', formData.username);
             const userConfirmed = response?.userConfirmed;
             if (userConfirmed) {
                 router.push('/');
             } else {
-                router.push('/confirm-email');
+                router.push('/confirm-user');
             }
         } catch (error: unknown) {
             console.error(error);

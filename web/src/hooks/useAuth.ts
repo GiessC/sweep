@@ -14,6 +14,11 @@ export interface SignUpRequest {
     confirmPassword?: string;
 }
 
+export interface ConfirmUserRequest {
+    username: string;
+    code: string;
+}
+
 export const useAuth = (): IAuthContext => ({
     login: async (
         request: LoginRequest,
@@ -35,6 +40,12 @@ export const useAuth = (): IAuthContext => ({
             request.email,
             request.username,
             request.password,
+        );
+    },
+    confirmUser: async (request: ConfirmUserRequest): Promise<void> => {
+        await AuthService.getInstance().confirmUser(
+            request.username,
+            request.code,
         );
     },
 });

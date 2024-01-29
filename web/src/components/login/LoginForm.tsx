@@ -3,6 +3,7 @@
 import { AuthContext } from '@/context/AuthContext';
 import type { LoginRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
+import { setItem } from '@/utils/localStorage';
 import {
     Box,
     Button,
@@ -34,6 +35,7 @@ const LoginForm = () => {
     const onSubmit = async (formData: LoginRequest) => {
         try {
             const loggedIn = await login(formData, () => router.push('/mfa')); // TODO: We will probably need to pass some state here.
+            setItem('username', formData.username);
             if (loggedIn) router.push('/');
         } catch (error: unknown) {
             if (isAWSError(error, 'UserNotFoundException')) {
@@ -41,6 +43,7 @@ const LoginForm = () => {
                 return;
             }
             if (isAWSError(error, 'UserNotConfirmedException')) {
+                setItem('username', formData.username);
                 router.push('/confirm-user');
                 return;
             }
@@ -89,24 +92,37 @@ const LoginForm = () => {
                     )}
                 </FormGroup>
                 <Stack
-                    className='m-auto'
+                    className='justify-between'
                     direction='row'
                     spacing={2}
                 >
                     <Button
-                        onClick={onCancel}
-                        disabled={isSubmitting}
+                        size='large'
+                        href='/sign-up'
                     >
-                        Cancel
+                        Sign up
                     </Button>
-                    <Button
-                        type='submit'
-                        variant='contained'
-                        className='bg-blue-500'
-                        disabled={isSubmitting || !isDirty || !isValid}
+                    <Stack
+                        direction='row'
+                        spacing={2}
                     >
-                        Login
-                    </Button>
+                        <Button
+                            onClick={onCancel}
+                            size='large'
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type='submit'
+                            variant='contained'
+                            className='bg-blue-500'
+                            size='large'
+                            disabled={isSubmitting || !isDirty || !isValid}
+                        >
+                            Login
+                        </Button>
+                    </Stack>
                 </Stack>
             </form>
         </Box>

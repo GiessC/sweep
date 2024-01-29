@@ -3,7 +3,10 @@ import { Box, Card, CardContent } from '@mui/material';
 
 const ConfirmUser = () => {
     return (
-        <Box paddingTop={10}>
+        <Box
+            className='w-1/3 m-auto'
+            paddingTop={10}
+        >
             <Card>
                 <CardContent>
                     <ConfirmUserForm />

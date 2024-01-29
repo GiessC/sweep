@@ -1,4 +1,8 @@
-import type { LoginRequest, SignUpRequest } from '@/hooks/useAuth';
+import type {
+    ConfirmUserRequest,
+    LoginRequest,
+    SignUpRequest,
+} from '@/hooks/useAuth';
 import { useAuth } from '@/hooks/useAuth';
 import { ISignUpResult } from 'amazon-cognito-identity-js';
 import { createContext } from 'react';
@@ -10,7 +14,7 @@ export interface IAuthContext {
     ) => Promise<boolean>;
     logout: () => Promise<boolean>;
     signUp: (request: SignUpRequest) => Promise<ISignUpResult | undefined>;
-    confirmUser: (code: string) => Promise<void>;
+    confirmUser: (request: ConfirmUserRequest) => Promise<void>;
 }
 
 export const AuthContext = createContext<IAuthContext>({

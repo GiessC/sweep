@@ -1,6 +1,5 @@
 import LoginForm from '@/components/login/LoginForm';
 import { Box, Card, CardContent } from '@mui/material';
-import Link from 'next/link';
 
 const Login = () => {
     return (
@@ -8,7 +7,6 @@ const Login = () => {
             <Card className='w-1/3 m-auto'>
                 <CardContent>
                     <LoginForm />
-                    <Link href='/sign-up'>Sign up</Link>
                 </CardContent>
             </Card>
         </Box>

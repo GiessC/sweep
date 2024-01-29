@@ -1,52 +1,92 @@
-import { FormGroup, TextField } from '@mui/material';
+'use client';
+
+import { AuthContext } from '@/context/AuthContext';
+import { ConfirmUserRequest } from '@/hooks/useAuth';
+import { getItem } from '@/utils/localStorage';
+import {
+    Box,
+    Button,
+    FormGroup,
+    FormHelperText,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-interface ConfirmUserRequest {
-    letter1: string;
-    letter2: string;
-    letter3: string;
-    letter4: string;
-    letter5: string;
-    letter6: string;
-}
-
 const ConfirmUserForm = () => {
+    const router = useRouter();
+    const [username, setUsername] = useState<string>('');
+    const { confirmUser } = useContext(AuthContext);
     const { formState, register, handleSubmit } = useForm<ConfirmUserRequest>();
+    const { isValid, isSubmitting, isDirty, errors } = formState;
 
-    const onSubmit = () => {};
+    useEffect(() => {
+        setUsername(getItem('username') ?? '');
+    }, []);
+
+    if (!username) {
+        return <>We forgot your username... awkward.</>;
+    }
+
+    const onSubmit = async (request: ConfirmUserRequest) => {
+        try {
+            await confirmUser(request);
+        } catch (error: unknown) {
+            console.error(error);
+        }
+    };
+
+    const onCancel = () => {
+        router.back();
+    };
 
     return (
-        <form
-            onSubmit={handleSubmit(onSubmit)}
-            noValidate
-        >
-            <FormGroup>
-                <TextField
-                    {...register('letter1')}
-                    label=''
-                />
-                <TextField
-                    {...register('letter2')}
-                    label=''
-                />
-                <TextField
-                    {...register('letter3')}
-                    label=''
-                />
-                <TextField
-                    {...register('letter4')}
-                    label=''
-                />
-                <TextField
-                    {...register('letter5')}
-                    label=''
-                />
-                <TextField
-                    {...register('letter6')}
-                    label=''
-                />
-            </FormGroup>
-        </form>
+        <Box className='flex flex-col'>
+            <form
+                onSubmit={handleSubmit((data) =>
+                    onSubmit({ ...data, username }),
+                )}
+                noValidate
+            >
+                <Typography variant='h3'>Confirm Email</Typography>
+                <Typography variant='body1'>
+                    We&apos;ve sent an email with a verification code. Please
+                    enter it here.
+                </Typography>
+                <FormGroup className='mt-4'>
+                    <TextField
+                        {...register('code')}
+                        name='code'
+                        label='Code'
+                        error={!!errors.code}
+                        required
+                        fullWidth
+                    />
+                    {!!errors.code && (
+                        <FormHelperText error>
+                            {errors.code.message}
+                        </FormHelperText>
+                    )}
+                </FormGroup>
+                <Stack
+                    className='pt-2 justify-center'
+                    direction='row'
+                    spacing={2}
+                >
+                    <Button onClick={onCancel}>Cancel</Button>
+                    <Button
+                        className='bg-blue-500'
+                        type='submit'
+                        variant='contained'
+                    >
+                        Confirm
+                    </Button>
+                </Stack>
+            </form>
+        </Box>
     );
 };
 
