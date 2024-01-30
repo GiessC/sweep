@@ -1,6 +1,7 @@
 'use client';
 
 import Modal from '@/components/common/Modal/Modal';
+import { useAuth } from '@/hooks/useAuth';
 import { Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -11,12 +12,21 @@ export interface LogoutModalProps {
 }
 
 const LogoutModal = ({ isOpen, setIsOpen }: LogoutModalProps) => {
+    const router = useRouter();
     const [loggingOut, setLoggingOut] = useState<boolean>(false);
-    const { push } = useRouter();
+    const { logout } = useAuth();
 
-    const logout = () => {
+    const onLogout = async () => {
         setLoggingOut(true);
-        push('/auth/logout');
+        try {
+            await logout();
+            setIsOpen(false);
+            router.push('/login');
+        } catch (error: unknown) {
+            console.error(error);
+        } finally {
+            setLoggingOut(false);
+        }
     };
 
     return (
@@ -31,7 +41,7 @@ const LogoutModal = ({ isOpen, setIsOpen }: LogoutModalProps) => {
                 cancelButton:
                     'bg-gray-300 text-black hover:bg-gray-400 disabled:bg-gray-100',
             }}
-            onConfirm={logout}
+            onConfirm={onLogout}
             cancelDisabled={loggingOut}
             confirmDisabled={loggingOut}
         >

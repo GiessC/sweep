@@ -43,9 +43,12 @@ export const useAuth = (): IAuthContext => ({
         );
     },
     confirmUser: async (request: ConfirmUserRequest): Promise<void> => {
-        await AuthService.getInstance().confirmUser(
+        return await AuthService.getInstance().confirmUser(
             request.username,
             request.code,
         );
+    },
+    isAuthenticated: async (): Promise<boolean> => {
+        return await AuthService.getInstance().isAuthenticated();
     },
 });

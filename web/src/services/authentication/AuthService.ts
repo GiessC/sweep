@@ -3,8 +3,8 @@ import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUse
 import {
     AuthenticationDetails,
     CognitoUser,
-    CognitoUserPool,
     CognitoUserAttribute,
+    CognitoUserPool,
     ISignUpResult,
 } from 'amazon-cognito-identity-js';
 
@@ -12,7 +12,7 @@ const USER_POOL_ID = envConfig.Cognito.USER_POOL_ID;
 const CLIENT_ID = envConfig.Cognito.CLIENT_ID;
 
 if (!CLIENT_ID || !USER_POOL_ID) {
-    console.error(
+    console.warn(
         'Missing Cognito CLIENT_ID or USER_POOL_ID. AuthService will be unavailable!',
     );
 }
@@ -120,18 +120,31 @@ export default class AuthService {
                 Username: username,
                 Pool: this.userPool,
             });
-            cognitoUser.confirmRegistration(
-                code,
-                true,
-                (error?: unknown, result?: unknown) => {
-                    if (!!error) {
-                        reject(error);
-                        return;
-                    }
-                    console.log(result);
-                    resolve();
-                },
-            );
+            cognitoUser.confirmRegistration(code, true, (error?: unknown) => {
+                if (!!error) {
+                    reject(error);
+                    return;
+                }
+                resolve();
+            });
+        });
+    }
+
+    public async isAuthenticated(): Promise<boolean> {
+        return await new Promise((resolve, reject) => {
+            const cognitoUser = this.userPool.getCurrentUser();
+            console.log(cognitoUser);
+            if (!cognitoUser) {
+                resolve(false);
+                return;
+            }
+            cognitoUser.getSession((error: Error | null) => {
+                if (!!error) {
+                    reject(error);
+                    return;
+                }
+                resolve(true);
+            });
         });
     }
 

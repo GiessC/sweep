@@ -8,10 +8,13 @@ import {
 import { Construct } from 'constructs';
 
 export class DynamoStack extends Stack {
+    readonly postsTable: TableV2;
+    readonly usersTable: TableV2;
+
     constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props);
 
-        new TableV2(this, 'Post', {
+        this.postsTable = new TableV2(this, 'Post', {
             tableName: 'Sweep-Post',
             billing: Billing.provisioned({
                 readCapacity: Capacity.autoscaled({ maxCapacity: 10 }),
@@ -34,7 +37,7 @@ export class DynamoStack extends Stack {
             removalPolicy: RemovalPolicy.DESTROY,
         });
 
-        new TableV2(this, 'User', {
+        this.usersTable = new TableV2(this, 'User', {
             tableName: 'Sweep-User',
             billing: Billing.provisioned({
                 readCapacity: Capacity.autoscaled({ maxCapacity: 10 }),

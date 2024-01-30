@@ -15,6 +15,7 @@ export interface IAuthContext {
     logout: () => Promise<boolean>;
     signUp: (request: SignUpRequest) => Promise<ISignUpResult | undefined>;
     confirmUser: (request: ConfirmUserRequest) => Promise<void>;
+    isAuthenticated: () => Promise<boolean>;
 }
 
 export const AuthContext = createContext<IAuthContext>({
@@ -22,6 +23,7 @@ export const AuthContext = createContext<IAuthContext>({
     logout: () => Promise.resolve(false),
     signUp: () => Promise.resolve(undefined),
     confirmUser: () => Promise.resolve(),
+    isAuthenticated: () => Promise.resolve(false),
 });
 
 export interface AuthProviderProps {

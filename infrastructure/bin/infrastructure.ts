@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
-import { DynamoStack } from '../lib/dynamo-stack';
+import 'source-map-support/register';
 import { CognitoStack } from '../lib/cognito-stack';
+import { DynamoStack } from '../lib/dynamo-stack';
 
 const app = new App();
 
-new CognitoStack(app, 'sweep-cognito-stack');
-new DynamoStack(app, 'sweep-dynamo-stack');
+const dynamoStack = new DynamoStack(app, 'sweep-dynamo-stack');
+new CognitoStack(app, 'sweep-cognito-stack', dynamoStack.usersTable);
 
 app.synth();

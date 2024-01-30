@@ -34,8 +34,11 @@ const ConfirmUserForm = () => {
     const onSubmit = async (request: ConfirmUserRequest) => {
         try {
             await confirmUser(request);
+            router.push('/login');
+            return;
         } catch (error: unknown) {
             console.error(error);
+            // TODO: Display error message to user
         }
     };
 

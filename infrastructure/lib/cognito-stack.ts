@@ -8,13 +8,21 @@ import {
     UserPoolClientIdentityProvider,
     UserPoolOperation,
 } from 'aws-cdk-lib/aws-cognito';
-import { Code, Function, Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
+import type { TableV2 } from 'aws-cdk-lib/aws-dynamodb';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { handler } from './triggers/PostConfirmationTriggerCognito';
 import path = require('path');
 
 export class CognitoStack extends Stack {
-    constructor(scope: Construct, id: string, props?: StackProps) {
+    readonly postConfirmationHandler: NodejsFunction;
+
+    constructor(
+        scope: Construct,
+        id: string,
+        usersTable: TableV2,
+        props?: StackProps,
+    ) {
         super(scope, id, props);
 
         const userPool = new UserPool(this, 'sweep-user-pool', {
@@ -78,20 +86,22 @@ export class CognitoStack extends Stack {
 
         userPool.addClient('sweep-user-pool-client');
 
+        this.postConfirmationHandler = new NodejsFunction(
+            this,
+            'post-confirmation-trigger-fn',
+            {
+                entry: path.resolve(
+                    __dirname,
+                    'lambda/PostConfirmationTriggerCognito.ts',
+                ),
+                handler: 'handler',
+                runtime: Runtime.NODEJS_LATEST,
+            },
+        );
+        usersTable.grantReadWriteData(this.postConfirmationHandler);
         userPool.addTrigger(
             UserPoolOperation.POST_CONFIRMATION,
-            new Function(this, 'sweep-post-confirmation-fn', {
-                functionName: 'sweep-post-confirmation-fn',
-                handler: 'index.handler',
-                tracing: Tracing.ACTIVE,
-                runtime: Runtime.NODEJS_LATEST,
-                code: Code.fromAsset(
-                    path.resolve(
-                        __dirname,
-                        './triggers/PostConfirmationTriggerCognito',
-                    ),
-                ),
-            }),
+            this.postConfirmationHandler,
         );
     }
 }

@@ -1,8 +1,8 @@
-import type { PostConfirmationTriggerEvent } from 'aws-lambda';
 import {
     DynamoDB as DynamoDBClient,
     PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import type { PostConfirmationTriggerEvent } from 'aws-lambda';
 
 export const handler = async (event: PostConfirmationTriggerEvent) => {
     const username = event.userName;
@@ -26,10 +26,14 @@ export const handler = async (event: PostConfirmationTriggerEvent) => {
                     },
                     id: { S: userId },
                     username: { S: username },
+                    createdAt: { S: new Date().toISOString() },
+                    updatedAt: { S: new Date().toISOString() },
                 },
             }),
         );
     } catch (error: unknown) {
         console.error(error);
+    } finally {
+        return event;
     }
 };
