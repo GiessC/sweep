@@ -14,8 +14,10 @@ export class DynamoStack extends Stack {
         super(scope, id, props);
 
         this.usersTable = this.createDynamoTable('User', 'Sweep-User');
-        new CfnOutput(this, 'UsersTableArn', {
+        new CfnOutput(this, 'sweep-users-table-arn-output', {
+            key: 'UsersTableArn',
             value: this.usersTable.tableArn,
+            exportName: 'UsersTableArn',
         });
         this.createDynamoTable('Post', 'Sweep-Post');
     }

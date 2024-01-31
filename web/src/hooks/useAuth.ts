@@ -19,7 +19,10 @@ export interface ConfirmUserRequest {
     code: string;
 }
 
-export const useAuth = (): IAuthContext => ({
+export const useAuth = (): Omit<
+    IAuthContext,
+    'isAuthenticated' | 'setIsAuthenticated'
+> => ({
     login: async (
         request: LoginRequest,
         redirectToMfa: () => void,
@@ -47,8 +50,5 @@ export const useAuth = (): IAuthContext => ({
             request.username,
             request.code,
         );
-    },
-    isAuthenticated: async (): Promise<boolean> => {
-        return await AuthService.getInstance().isAuthenticated();
     },
 });

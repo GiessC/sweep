@@ -1,5 +1,6 @@
 import envConfig from '@/config/env';
 import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUserError';
+import type { CognitoUserSession } from 'amazon-cognito-identity-js';
 import {
     AuthenticationDetails,
     CognitoUser,
@@ -138,13 +139,16 @@ export default class AuthService {
                 resolve(false);
                 return;
             }
-            cognitoUser.getSession((error: Error | null) => {
-                if (!!error) {
-                    reject(error);
-                    return;
-                }
-                resolve(true);
-            });
+            cognitoUser.getSession(
+                (error: Error | null, session: CognitoUserSession | null) => {
+                    console.log(error, session);
+                    if (!!error) {
+                        reject(error);
+                        return;
+                    }
+                    resolve(session?.isValid() ?? false);
+                },
+            );
         });
     }
 

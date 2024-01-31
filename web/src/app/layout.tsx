@@ -2,9 +2,9 @@
 
 import Navbar from '@/components/Navbar';
 import AuthProvider from '@/context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import './globals.css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface LayoutProps {
     children: React.ReactNode;

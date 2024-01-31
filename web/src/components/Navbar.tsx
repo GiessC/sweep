@@ -1,56 +1,99 @@
 'use client';
 
 import LogoutModal from '@/components/logout/LogoutModal';
-import { useAuth } from '@/hooks/useAuth';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { AuthContext, IAuthContext } from '@/context/AuthContext';
+import {
+    AppBar,
+    Box,
+    Button,
+    IconButton,
+    Menu,
+    MenuItem,
+    Toolbar,
+} from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { useContext, useState } from 'react';
+import { CgProfile as AccountCircle } from 'react-icons/cg';
 
 const Navbar = () => {
-    const { isAuthenticated: isAuthenticatedFn } = useAuth();
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const router = useRouter();
+    const { isAuthenticated } = useContext<IAuthContext>(AuthContext);
     const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
+    const [anchorEl, setAnchorEl] = useState<Element | null>(null);
 
-    useEffect(() => {
-        const isAuthenticated = async () => {
-            setIsLoading(false);
-            const isAuthenticated = await isAuthenticatedFn();
-            setIsLoading(false);
-            setIsAuthenticated(isAuthenticated);
-        };
-        isAuthenticated();
-    }, []);
+    const handleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-    const logout = () => {
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const onLogin = () => {
+        router.push('/login');
+    };
+
+    const onProfile = () => {
+        router.push('/profile/me');
+        handleClose();
+    };
+
+    const onLogout = () => {
         setLogoutModalOpen(true);
     };
 
-    if (isLoading) return <>Loading...</>;
-
     return (
         <>
-            <div className='w-full h-16 bg-stone-500 fixed top-0'>
-                <div className='container mx-auto px-4 h-full'>
-                    <div className='flex justify-between items-center h-full'>
-                        <ul className='hidden md:flex gap-x-6 text-white'>
-                            {!isAuthenticated && (
-                                <li>
-                                    <Link href='/login'>
-                                        <p>Login</p>
-                                    </Link>
-                                </li>
-                            )}
-                            {isAuthenticated && (
-                                <li>
-                                    <button onClick={logout}>
-                                        <p>Logout</p>
-                                    </button>
-                                </li>
-                            )}
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            <Box className='flex-grow-0'>
+                <AppBar className='bg-primary'>
+                    <Toolbar>
+                        {!isAuthenticated && (
+                            <Button
+                                size='large'
+                                color='inherit'
+                                onClick={onLogin}
+                            >
+                                Login
+                            </Button>
+                        )}
+                        {isAuthenticated && (
+                            <div>
+                                <IconButton
+                                    size='large'
+                                    aria-controls='menu-appbar'
+                                    aria-haspopup='true'
+                                    onClick={handleMenu}
+                                    color='inherit'
+                                >
+                                    <AccountCircle />
+                                </IconButton>
+                                <Menu
+                                    id='menu-appbar'
+                                    anchorEl={anchorEl}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleClose}
+                                >
+                                    <MenuItem onClick={onProfile}>
+                                        Profile
+                                    </MenuItem>
+                                    <MenuItem onClick={onLogout}>
+                                        Logout
+                                    </MenuItem>
+                                </Menu>
+                            </div>
+                        )}
+                    </Toolbar>
+                </AppBar>
+            </Box>
             <LogoutModal
                 isOpen={logoutModalOpen}
                 setIsOpen={setLogoutModalOpen}

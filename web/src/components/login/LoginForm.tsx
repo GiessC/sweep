@@ -3,7 +3,7 @@
 import { AuthContext } from '@/context/AuthContext';
 import type { LoginRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
-import { setItem } from '@/utils/localStorage';
+import { removeItem, setItem } from '@/utils/localStorage';
 import {
     Box,
     Button,
@@ -22,7 +22,7 @@ const useAlert =
     (..._: unknown[]) => {}; // TODO: We need some sort of alert/notification system!
 
 const LoginForm = () => {
-    const { login } = useContext(AuthContext);
+    const { login, setIsAuthenticated } = useContext(AuthContext);
     const router = useRouter();
     const showAlert = useAlert();
     const { formState, register, handleSubmit } = useForm<LoginRequest>();
@@ -36,7 +36,11 @@ const LoginForm = () => {
         try {
             const loggedIn = await login(formData, () => router.push('/mfa')); // TODO: We will probably need to pass some state here.
             setItem('username', formData.username);
-            if (loggedIn) router.push('/');
+            if (loggedIn) {
+                setIsAuthenticated(true);
+                removeItem('username');
+                router.push('/');
+            }
         } catch (error: unknown) {
             if (isAWSError(error, 'UserNotFoundException')) {
                 showAlert('User does not exist', 'error');
