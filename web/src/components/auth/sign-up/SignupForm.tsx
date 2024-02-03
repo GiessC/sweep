@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthContext } from '@/context/AuthContext';
+import { TOO_MANY_REQUESTS } from '@/errors/ErrorMessages';
 import signUpSchema from '@/features/auth/sign-up/schema';
 import { SignUpRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
@@ -27,8 +28,15 @@ const DEFAULT_VALUES = {
     confirmPassword: '',
 };
 
+const useAlert = () => {
+    return (message: string, type: string) => {
+        console.log(message, type);
+    };
+};
+
 const SignupForm = () => {
     const router = useRouter();
+    const showAlert = useAlert();
     const { signUp } = useContext(AuthContext);
     const { formState, register, handleSubmit } = useForm<SignUpRequest>(
         USE_FORM_CONFIG<SignUpRequest>(
@@ -53,9 +61,22 @@ const SignupForm = () => {
                 router.push('/auth/confirm-user');
             }
         } catch (error: unknown) {
-            console.error(error);
-            if (isAWSError(error, 'UserExists')) {
-                // Display the error
+            if (isAWSError(error, 'CodeDeliveryFailureException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'InvalidParameterException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'InvalidPasswordException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'TooManyRequestsException')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
+            } else if (isAWSError(error, 'UsernameExistsException')) {
+                showAlert('Username already exists.', 'error');
+            } else if (error instanceof Error) {
+                console.error(error.message);
+                showAlert(error.message, 'error');
+            } else {
+                console.error(error);
+                showAlert('An unknown error occurred.', 'error');
             }
         }
     };

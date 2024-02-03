@@ -1,5 +1,7 @@
 import { AuthContext } from '@/context/AuthContext';
+import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
 import forgotPasswordSchema from '@/features/auth/password/forgot/schema';
+import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
 import { removeItem, setItem } from '@/utils/localStorage';
 import Box from '@mui/material/Box';
@@ -23,8 +25,15 @@ const DEFAULT_VALUES: ForgotPasswordValues = {
     username: '',
 };
 
+const useAlert = () => {
+    return (message: string, type: string) => {
+        console.log(message, type);
+    };
+};
+
 const ForgotPasswordForm = () => {
     const router = useRouter();
+    const showAlert = useAlert();
     const { forgotPassword } = useContext(AuthContext);
     const { formState, register, handleSubmit } = useForm<ForgotPasswordValues>(
         USE_FORM_CONFIG(DEFAULT_VALUES, forgotPasswordSchema),
@@ -40,9 +49,28 @@ const ForgotPasswordForm = () => {
                 redirectToForgotPasswordCode,
             );
         } catch (error: unknown) {
-            // TODO: Error handling
+            if (isAWSError(error, 'CodeDeliveryFailureException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'InvalidParameterException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'NotAuthorizedException')) {
+                showAlert(
+                    'You are not authorized to perform this action.',
+                    'error',
+                );
+            } else if (isAWSError(error, 'TooManyRequestsException')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
+            } else if (isAWSError(error, 'UserNotFoundException')) {
+                showAlert('User not found.', 'error');
+                router.push('/auth/login');
+            } else if (error instanceof Error) {
+                console.error(error.message);
+                showAlert(error.message, 'error');
+            } else {
+                console.error(error);
+                showAlert(UNKNOWN(), 'error');
+            }
             removeItem('username');
-            console.error(error);
         }
     };
 

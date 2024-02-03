@@ -1,8 +1,10 @@
 'use client';
 
 import { AuthContext } from '@/context/AuthContext';
+import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
 import confirmUserSchema from '@/features/auth/confirm-user/schema';
 import { ConfirmUserRequest } from '@/hooks/useAuth';
+import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
 import { getItem } from '@/utils/localStorage';
 import {
@@ -23,8 +25,15 @@ const DEFAULT_VALUES: ConfirmUserRequest = {
     username: '',
 };
 
+const useAlert = () => {
+    return (message: string, type: string) => {
+        console.log(message, type);
+    };
+};
+
 const ConfirmUserForm = () => {
     const router = useRouter();
+    const showAlert = useAlert();
     const [username, setUsername] = useState<string>('');
     const { confirmUser } = useContext(AuthContext);
     const { formState, register, handleSubmit } = useForm<ConfirmUserRequest>(
@@ -46,8 +55,30 @@ const ConfirmUserForm = () => {
             router.push('/auth/login');
             return;
         } catch (error: unknown) {
-            console.error(error);
-            // TODO: Display error message to user
+            if (isAWSError(error, 'CodeMismatchException')) {
+                showAlert('Incorrect code.', 'error');
+            } else if (isAWSError(error, 'ExpiredCodeException')) {
+                showAlert('The code you entered has expired.', 'error');
+            } else if (
+                isAWSError(error, 'InvalidLambdaResponseException') ||
+                isAWSError(error, 'UnexpectedLambdaException') ||
+                isAWSError(error, 'UserLambdaValidationException')
+            ) {
+                showAlert(
+                    'An error occurred while adding user to database. Please contact support.',
+                    'error',
+                );
+            } else if (isAWSError(error, 'InvalidParameterException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'TooManyFailedAttemptsException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'TooManyRequests')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
+            } else if (error instanceof Error) {
+                showAlert(error.message, 'error');
+            } else {
+                showAlert(UNKNOWN(), 'error');
+            }
         }
     };
 

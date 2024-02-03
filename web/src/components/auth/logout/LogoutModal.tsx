@@ -2,6 +2,8 @@
 
 import Modal from '@/components/common/Modal/Modal';
 import { AuthContext } from '@/context/AuthContext';
+import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
+import { isAWSError } from '@/utils/awsUtils';
 import { setItem } from '@/utils/localStorage';
 import { Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
@@ -12,8 +14,15 @@ export interface LogoutModalProps {
     setIsOpen: (isOpen: boolean) => void;
 }
 
+const useAlert = () => {
+    return (message: string, type: string) => {
+        console.log(message, type);
+    };
+};
+
 const LogoutModal = ({ isOpen, setIsOpen }: LogoutModalProps) => {
     const router = useRouter();
+    const showAlert = useAlert();
     const [loggingOut, setLoggingOut] = useState<boolean>(false);
     const { logout, setIsAuthenticated } = useContext(AuthContext);
 
@@ -26,7 +35,20 @@ const LogoutModal = ({ isOpen, setIsOpen }: LogoutModalProps) => {
             setIsOpen(false);
             router.push('/auth/login');
         } catch (error: unknown) {
-            console.error(error);
+            if (isAWSError(error, 'NotAuthorizedException')) {
+                setItem('isAuthenticated', 'false');
+                setIsAuthenticated(false);
+                setIsOpen(false);
+                router.push('/auth/login');
+            } else if (isAWSError(error, 'TooManyRequestsException')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
+            } else if (error instanceof Error) {
+                console.error(error);
+                showAlert(error.message, 'error');
+            } else {
+                console.error(error);
+                showAlert(UNKNOWN(), 'error');
+            }
         } finally {
             setLoggingOut(false);
         }

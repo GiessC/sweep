@@ -1,5 +1,11 @@
 import { AuthContext } from '@/context/AuthContext';
+import {
+    NOT_CONFIRMED,
+    TOO_MANY_REQUESTS,
+    UNKNOWN,
+} from '@/errors/ErrorMessages';
 import resetPasswordSchema from '@/features/auth/password/reset/schema';
+import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
 import { removeItem } from '@/utils/localStorage';
 import Box from '@mui/material/Box';
@@ -49,9 +55,27 @@ const ResetPasswordForm = () => {
             showAlert('Password changed successfully.', 'success');
             router.back();
         } catch (error: unknown) {
-            // TODO: Error handling
+            if (isAWSError(error, 'InvalidParameterException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'InvalidPasswordException')) {
+                showAlert('Incorrect password.', 'error');
+            } else if (isAWSError(error, 'NotAuthorizedException')) {
+                showAlert(
+                    'You are not authorized to perform this action.',
+                    'error',
+                );
+            } else if (isAWSError(error, 'TooManyRequestsException')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
+            } else if (isAWSError(error, 'UserNotConfirmedException')) {
+                showAlert(NOT_CONFIRMED(), 'error');
+            } else if (error instanceof Error) {
+                console.error(error.message);
+                showAlert(error.message, 'error');
+            } else {
+                console.error(error);
+                showAlert(UNKNOWN(), 'error');
+            }
             removeItem('username');
-            console.error(error);
         }
     };
 

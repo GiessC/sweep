@@ -1,4 +1,10 @@
 import { AuthContext } from '@/context/AuthContext';
+import {
+    CODE_MISMATCH,
+    EXPIRED_CODE,
+    NOT_CONFIRMED,
+    TOO_MANY_REQUESTS,
+} from '@/errors/ErrorMessages';
 import forgotPasswordCodeSchema from '@/features/auth/password/forgot/code/schema';
 import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
@@ -57,9 +63,27 @@ const ForgotPasswordCodeForm = () => {
         } catch (error: unknown) {
             console.error(error);
             if (isAWSError(error, 'CodeMismatchException')) {
-                showAlert('Incorrect code.', 'error');
+                showAlert(CODE_MISMATCH(), 'error');
+            } else if (isAWSError(error, 'ExpiredCodeException')) {
+                showAlert(EXPIRED_CODE(), 'error');
+            } else if (isAWSError(error, 'InvalidParameterException')) {
+                showAlert((error as Error).message, 'error');
             } else if (isAWSError(error, 'InvalidPasswordException')) {
                 showAlert('Invalid password.', 'error');
+            } else if (isAWSError(error, 'NotAuthorizedException')) {
+                showAlert(
+                    'You are not authorized to perform this action.',
+                    'error',
+                );
+            } else if (isAWSError(error, 'TooManyFailedAttemptsException')) {
+                showAlert('Too many failed attempts.', 'error');
+            } else if (isAWSError(error, 'TooManyRequestsException')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
+            } else if (isAWSError(error, 'UserNotConfirmedException')) {
+                showAlert(NOT_CONFIRMED(), 'error');
+            } else if (isAWSError(error, 'UserNotFoundException')) {
+                showAlert('User not found.', 'error');
+                router.push('/auth/login');
             } else if (error instanceof Error) {
                 showAlert(error.message, 'error');
             }

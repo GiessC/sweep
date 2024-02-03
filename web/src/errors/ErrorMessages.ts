@@ -18,4 +18,14 @@ export const NOT_FOUND = (friendlyName: string, searchKey: string) =>
 
 export const INVALID_EMAIL = () => 'Please specify a valid email';
 
+export const TOO_MANY_REQUESTS = () =>
+    'You are making too many requests. Slow down!';
+
+export const CODE_MISMATCH = () =>
+    'The code you entered does not match the code we sent you.';
+
+export const EXPIRED_CODE = () => 'The code you entered has expired.';
+
+export const NOT_CONFIRMED = () => 'User has not confirmed their email.';
+
 export const UNKNOWN = () => `An unknown error occurred.`;

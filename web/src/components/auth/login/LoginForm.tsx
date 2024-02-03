@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthContext } from '@/context/AuthContext';
+import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
 import loginSchema from '@/features/auth/login/schema';
 import type { LoginRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
@@ -53,13 +54,21 @@ const LoginForm = () => {
                 router.push('/');
             }
         } catch (error: unknown) {
-            if (isAWSError(error, 'UserNotFoundException')) {
-                showAlert('User does not exist', 'error');
+            if (isAWSError(error, 'InvalidParameterException')) {
+                showAlert((error as Error).message, 'error');
+            } else if (isAWSError(error, 'NotAuthorizedException')) {
+                showAlert('Incorrect username or password.', 'error');
+            } else if (isAWSError(error, 'TooManyRequestsException')) {
+                showAlert(TOO_MANY_REQUESTS(), 'error');
             } else if (isAWSError(error, 'UserNotConfirmedException')) {
                 setItem('username', formData.username);
                 router.push('/auth/confirm-user');
-            } else if (isAWSError(error, 'NotAuthorizedException')) {
-                showAlert('Invalid username or password.', 'error');
+            } else if (isAWSError(error, 'UserNotFoundException')) {
+                showAlert(`${formData.username} does not exist.`, 'error');
+            } else if (error instanceof Error) {
+                showAlert(error.message, 'error');
+            } else {
+                showAlert(UNKNOWN(), 'error');
             }
         }
     };
