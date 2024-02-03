@@ -1,15 +1,15 @@
 'use client';
 
-import { FormHelperText, Stack, TextField } from '@mui/material';
-import { yupResolver } from '@hookform/resolvers/yup';
-import Modal from '../common/Modal/Modal';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { useEffect } from 'react';
-import CreatePostRequest from '@/models/posts/requests/CreatePostRequest';
+import { APIError } from '@/api/APIResponse';
+import createPostSchema from '@/features/posts/create/schema';
 import { useCreatePost } from '@/hooks/usePost';
 import Post from '@/models/posts/Post';
-import { APIError } from '@/api/APIResponse';
-import { createPostReqSchema } from '@/config/validationSchema';
+import CreatePostRequest from '@/models/posts/requests/CreatePostRequest';
+import { USE_FORM_CONFIG } from '@/utils/forms';
+import { FormHelperText, Stack, TextField } from '@mui/material';
+import { useEffect } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import Modal from '../common/Modal/Modal';
 
 export interface CreatePostModalProps {
     isOpen: boolean;
@@ -30,12 +30,12 @@ const CreatePostForm = ({
     onCreate = () => {},
 }: CreatePostModalProps) => {
     const { formState, reset, handleSubmit, register, setError } =
-        useForm<CreatePostRequest>({
-            defaultValues: DEFAULT_VALUES,
-            resolver: yupResolver(createPostReqSchema),
-            reValidateMode: 'onChange',
-            mode: 'onChange',
-        });
+        useForm<CreatePostRequest>(
+            USE_FORM_CONFIG<CreatePostRequest>(
+                DEFAULT_VALUES,
+                createPostSchema,
+            ),
+        );
     const { isSubmitting, isSubmitSuccessful, errors, isDirty, isValid } =
         formState;
     const createPostMutation = useCreatePost();

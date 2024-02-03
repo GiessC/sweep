@@ -2,6 +2,7 @@
 
 import Modal from '@/components/common/Modal/Modal';
 import { AuthContext } from '@/context/AuthContext';
+import { setItem } from '@/utils/localStorage';
 import { Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
@@ -20,9 +21,10 @@ const LogoutModal = ({ isOpen, setIsOpen }: LogoutModalProps) => {
         setLoggingOut(true);
         try {
             await logout();
+            setItem('isAuthenticated', 'false');
             setIsAuthenticated(false);
             setIsOpen(false);
-            router.push('/login');
+            router.push('/auth/login');
         } catch (error: unknown) {
             console.error(error);
         } finally {

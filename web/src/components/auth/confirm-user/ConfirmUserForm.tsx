@@ -1,7 +1,9 @@
 'use client';
 
 import { AuthContext } from '@/context/AuthContext';
+import confirmUserSchema from '@/features/auth/confirm-user/schema';
 import { ConfirmUserRequest } from '@/hooks/useAuth';
+import { USE_FORM_CONFIG } from '@/utils/forms';
 import { getItem } from '@/utils/localStorage';
 import {
     Box,
@@ -16,11 +18,18 @@ import { useRouter } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+const DEFAULT_VALUES: ConfirmUserRequest = {
+    code: '',
+    username: '',
+};
+
 const ConfirmUserForm = () => {
     const router = useRouter();
     const [username, setUsername] = useState<string>('');
     const { confirmUser } = useContext(AuthContext);
-    const { formState, register, handleSubmit } = useForm<ConfirmUserRequest>();
+    const { formState, register, handleSubmit } = useForm<ConfirmUserRequest>(
+        USE_FORM_CONFIG<ConfirmUserRequest>(DEFAULT_VALUES, confirmUserSchema),
+    );
     const { isValid, isSubmitting, isDirty, errors } = formState;
 
     useEffect(() => {
@@ -34,7 +43,7 @@ const ConfirmUserForm = () => {
     const onSubmit = async (request: ConfirmUserRequest) => {
         try {
             await confirmUser(request);
-            router.push('/login');
+            router.push('/auth/login');
             return;
         } catch (error: unknown) {
             console.error(error);
@@ -79,11 +88,17 @@ const ConfirmUserForm = () => {
                     direction='row'
                     spacing={2}
                 >
-                    <Button onClick={onCancel}>Cancel</Button>
+                    <Button
+                        onClick={onCancel}
+                        disabled={isSubmitting}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         className='bg-blue-500'
                         type='submit'
                         variant='contained'
+                        disabled={!isValid || !isDirty || isSubmitting}
                     >
                         Confirm
                     </Button>

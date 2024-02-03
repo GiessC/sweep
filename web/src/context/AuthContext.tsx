@@ -4,11 +4,13 @@ import type {
     SignUpRequest,
 } from '@/hooks/useAuth';
 import { useAuth } from '@/hooks/useAuth';
+import { getItem } from '@/utils/localStorage';
 import { ISignUpResult } from 'amazon-cognito-identity-js';
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 
 export interface IAuthContext {
     isAuthenticated: boolean;
+    setIsAuthenticated: (isAuthenticated: boolean) => void;
     login: (
         request: LoginRequest,
         redirectToMfa: () => void,
@@ -16,16 +18,32 @@ export interface IAuthContext {
     logout: () => Promise<boolean>;
     signUp: (request: SignUpRequest) => Promise<ISignUpResult | undefined>;
     confirmUser: (request: ConfirmUserRequest) => Promise<void>;
-    setIsAuthenticated: (isAuthenticated: boolean) => void;
+    forgotPassword: (
+        username: string,
+        email: string,
+        redirectToForgotPasswordCode: () => void,
+    ) => Promise<void>;
+    confirmPassword: (
+        username: string,
+        code: string,
+        newPassword: string,
+    ) => Promise<void>;
+    resetPassword: (
+        currentPassword: string,
+        newPassword: string,
+    ) => Promise<void>;
 }
 
 export const AuthContext = createContext<IAuthContext>({
     isAuthenticated: false,
+    setIsAuthenticated: () => {},
     login: () => Promise.resolve(false),
     logout: () => Promise.resolve(false),
     signUp: () => Promise.resolve(undefined),
     confirmUser: () => Promise.resolve(),
-    setIsAuthenticated: () => {},
+    forgotPassword: () => Promise.resolve(),
+    confirmPassword: () => Promise.resolve(),
+    resetPassword: () => Promise.resolve(),
 });
 
 export interface AuthProviderProps {
@@ -35,6 +53,10 @@ export interface AuthProviderProps {
 const AuthProvider = ({ children }: AuthProviderProps) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const auth = useAuth();
+
+    useEffect(() => {
+        setIsAuthenticated(getItem('isAuthenticated') === 'true');
+    }, []);
 
     return (
         <AuthContext.Provider

@@ -1,6 +1,5 @@
 import envConfig from '@/config/env';
 import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUserError';
-import type { CognitoUserSession } from 'amazon-cognito-identity-js';
 import {
     AuthenticationDetails,
     CognitoUser,
@@ -131,22 +130,81 @@ export default class AuthService {
         });
     }
 
-    public async isAuthenticated(): Promise<boolean> {
+    public async forgotPassword(
+        username: string,
+        email: string,
+        redirectToForgotPasswordCode: () => void,
+    ): Promise<void> {
+        // TODO: Check if the email and username match (using DynamoDB)
+        // TODO: Check if the user has forgotten their password too recently (DynamoDB - needs added field in user table)
+        return await new Promise((resolve, reject) => {
+            const cognitoUser = new CognitoUser({
+                Username: username,
+                Pool: this.userPool,
+            });
+            cognitoUser.forgotPassword({
+                onSuccess: () => resolve(),
+                onFailure: reject,
+                inputVerificationCode: () => {
+                    redirectToForgotPasswordCode();
+                    resolve();
+                },
+            });
+        });
+    }
+
+    public async forgotUsername(email: string): Promise<string> {
+        // TODO: This needs to use an email service.
+        return '';
+    }
+
+    public async confirmPassword(
+        username: string,
+        code: string,
+        newPassword: string,
+    ): Promise<void> {
+        return await new Promise((resolve, reject) => {
+            const cognitoUser = new CognitoUser({
+                Username: username,
+                Pool: this.userPool,
+            });
+            cognitoUser.confirmPassword(code, newPassword, {
+                onSuccess: () => resolve(),
+                onFailure: reject,
+            });
+        });
+    }
+
+    public async resetPassword(
+        currentPassword: string,
+        newPassword: string,
+    ): Promise<void> {
         return await new Promise((resolve, reject) => {
             const cognitoUser = this.userPool.getCurrentUser();
-            console.log(cognitoUser);
             if (!cognitoUser) {
-                resolve(false);
+                reject(
+                    new NoAuthenticatedUserError(
+                        'NoAuthenticatedUser',
+                        'No user is currently logged in.',
+                    ),
+                );
                 return;
             }
-            cognitoUser.getSession(
-                (error: Error | null, session: CognitoUserSession | null) => {
-                    console.log(error, session);
+            cognitoUser.getSession((error: Error | null) => {
+                if (!!error) {
+                    reject(error);
+                    return;
+                }
+            });
+            cognitoUser.changePassword(
+                currentPassword,
+                newPassword,
+                (error?: unknown) => {
                     if (!!error) {
                         reject(error);
                         return;
                     }
-                    resolve(session?.isValid() ?? false);
+                    resolve();
                 },
             );
         });

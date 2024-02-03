@@ -1,6 +1,6 @@
 'use client';
 
-import LogoutModal from '@/components/logout/LogoutModal';
+import LogoutModal from '@/components/auth/logout/LogoutModal';
 import { AuthContext, IAuthContext } from '@/context/AuthContext';
 import {
     AppBar,
@@ -11,6 +11,7 @@ import {
     MenuItem,
     Toolbar,
 } from '@mui/material';
+import { Squash as MenuIcon } from 'hamburger-react';
 import { useRouter } from 'next/navigation';
 import { useContext, useState } from 'react';
 import { CgProfile as AccountCircle } from 'react-icons/cg';
@@ -22,6 +23,10 @@ const Navbar = () => {
     const [anchorEl, setAnchorEl] = useState<Element | null>(null);
 
     const handleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+        // TODO: Create a navigation menu for a user's communities and such.
+    };
+
+    const handleUserMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
@@ -30,11 +35,16 @@ const Navbar = () => {
     };
 
     const onLogin = () => {
-        router.push('/login');
+        router.push('/auth/login');
     };
 
     const onProfile = () => {
         router.push('/profile/me');
+        handleClose();
+    };
+
+    const onResetPassword = () => {
+        router.push('/auth/password/reset');
         handleClose();
     };
 
@@ -44,9 +54,22 @@ const Navbar = () => {
 
     return (
         <>
-            <Box className='flex-grow-0'>
+            <Box className='flex grow'>
                 <AppBar className='bg-primary'>
                     <Toolbar>
+                        <Button
+                            className='mr-2'
+                            size='large'
+                            aria-controls='menu-appbar'
+                            aria-haspopup='true'
+                            onClick={handleMenu}
+                            color='inherit'
+                        >
+                            <MenuIcon />
+                        </Button>
+                        <div className='grow'>
+                            {/* TODO: Quick links go here */}
+                        </div>
                         {!isAuthenticated && (
                             <Button
                                 size='large'
@@ -60,15 +83,15 @@ const Navbar = () => {
                             <div>
                                 <IconButton
                                     size='large'
-                                    aria-controls='menu-appbar'
+                                    aria-controls='user-menu-appbar'
                                     aria-haspopup='true'
-                                    onClick={handleMenu}
+                                    onClick={handleUserMenu}
                                     color='inherit'
                                 >
                                     <AccountCircle />
                                 </IconButton>
                                 <Menu
-                                    id='menu-appbar'
+                                    id='user-menu-appbar'
                                     anchorEl={anchorEl}
                                     anchorOrigin={{
                                         vertical: 'bottom',
@@ -84,6 +107,10 @@ const Navbar = () => {
                                 >
                                     <MenuItem onClick={onProfile}>
                                         Profile
+                                    </MenuItem>
+                                    {/* ? TODO: Reset password may not be here in the future. May be on a settings page (but we lack enough features to justify a settings page) */}
+                                    <MenuItem onClick={onResetPassword}>
+                                        Reset Password
                                     </MenuItem>
                                     <MenuItem onClick={onLogout}>
                                         Logout

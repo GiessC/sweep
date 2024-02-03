@@ -1,4 +1,4 @@
-import ConfirmUserForm from '@/components/confirm-user/ConfirmUserForm';
+import ConfirmUserForm from '@/components/auth/confirm-user/ConfirmUserForm';
 import { Box, Card, CardContent } from '@mui/material';
 
 const ConfirmUser = () => {

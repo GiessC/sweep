@@ -51,4 +51,35 @@ export const useAuth = (): Omit<
             request.code,
         );
     },
+    forgotPassword: async (
+        username: string,
+        email: string,
+        redirectToForgotPasswordCode: () => void,
+    ): Promise<void> => {
+        return await AuthService.getInstance().forgotPassword(
+            username,
+            email,
+            redirectToForgotPasswordCode,
+        );
+    },
+    confirmPassword: async (
+        username: string,
+        code: string,
+        newPassword: string,
+    ): Promise<void> => {
+        return await AuthService.getInstance().confirmPassword(
+            username,
+            code,
+            newPassword,
+        );
+    },
+    resetPassword: async (
+        currentPassword: string,
+        newPassword: string,
+    ): Promise<void> => {
+        return await AuthService.getInstance().resetPassword(
+            currentPassword,
+            newPassword,
+        );
+    },
 });

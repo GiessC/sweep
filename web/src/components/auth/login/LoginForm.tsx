@@ -1,8 +1,10 @@
 'use client';
 
 import { AuthContext } from '@/context/AuthContext';
+import loginSchema from '@/features/auth/login/schema';
 import type { LoginRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
+import { USE_FORM_CONFIG } from '@/utils/forms';
 import { removeItem, setItem } from '@/utils/localStorage';
 import {
     Box,
@@ -13,6 +15,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,11 +24,18 @@ const useAlert =
     () =>
     (..._: unknown[]) => {}; // TODO: We need some sort of alert/notification system!
 
+const DEFAULT_VALUES: LoginRequest = {
+    username: '',
+    password: '',
+};
+
 const LoginForm = () => {
     const { login, setIsAuthenticated } = useContext(AuthContext);
     const router = useRouter();
     const showAlert = useAlert();
-    const { formState, register, handleSubmit } = useForm<LoginRequest>();
+    const { formState, register, handleSubmit } = useForm<LoginRequest>(
+        USE_FORM_CONFIG<LoginRequest>(DEFAULT_VALUES, loginSchema),
+    );
     const { isValid, isSubmitting, isDirty, errors } = formState;
 
     const onCancel = () => {
@@ -37,6 +47,7 @@ const LoginForm = () => {
             const loggedIn = await login(formData, () => router.push('/mfa')); // TODO: We will probably need to pass some state here.
             setItem('username', formData.username);
             if (loggedIn) {
+                setItem('isAuthenticated', 'true');
                 setIsAuthenticated(true);
                 removeItem('username');
                 router.push('/');
@@ -44,12 +55,11 @@ const LoginForm = () => {
         } catch (error: unknown) {
             if (isAWSError(error, 'UserNotFoundException')) {
                 showAlert('User does not exist', 'error');
-                return;
-            }
-            if (isAWSError(error, 'UserNotConfirmedException')) {
+            } else if (isAWSError(error, 'UserNotConfirmedException')) {
                 setItem('username', formData.username);
-                router.push('/confirm-user');
-                return;
+                router.push('/auth/confirm-user');
+            } else if (isAWSError(error, 'NotAuthorizedException')) {
+                showAlert('Invalid username or password.', 'error');
             }
         }
     };
@@ -95,6 +105,23 @@ const LoginForm = () => {
                         </FormHelperText>
                     )}
                 </FormGroup>
+                <Typography variant='body1'>
+                    Forgot{' '}
+                    <Link
+                        className='text-blue-500 hover:underline'
+                        href='/auth/username'
+                    >
+                        Username
+                    </Link>{' '}
+                    or{' '}
+                    <Link
+                        className='text-blue-500 hover:underline'
+                        href='/auth/password/forgot'
+                    >
+                        Password
+                    </Link>
+                    ?
+                </Typography>
                 <Stack
                     className='justify-between'
                     direction='row'
@@ -102,7 +129,7 @@ const LoginForm = () => {
                 >
                     <Button
                         size='large'
-                        href='/sign-up'
+                        href='/auth/sign-up'
                     >
                         Sign up
                     </Button>

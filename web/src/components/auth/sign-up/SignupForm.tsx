@@ -1,7 +1,11 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { AuthContext } from '@/context/AuthContext';
+import signUpSchema from '@/features/auth/sign-up/schema';
+import { SignUpRequest } from '@/hooks/useAuth';
+import { isAWSError } from '@/utils/awsUtils';
+import { USE_FORM_CONFIG } from '@/utils/forms';
+import { setItem } from '@/utils/localStorage';
 import {
     Box,
     Button,
@@ -11,31 +15,27 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { SignUpRequest } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
-import { AuthContext } from '@/context/AuthContext';
-import { signupReqSchema } from '@/config/validationSchema';
+import { useForm } from 'react-hook-form';
 import { ObjectSchema } from 'yup';
-import { isAWSError } from '@/utils/awsUtils';
-import { setItem } from '@/utils/localStorage';
+
+const DEFAULT_VALUES = {
+    email: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+};
 
 const SignupForm = () => {
     const router = useRouter();
     const { signUp } = useContext(AuthContext);
-    const { formState, register, handleSubmit } = useForm<SignUpRequest>({
-        resolver: yupResolver<SignUpRequest>(
-            signupReqSchema as ObjectSchema<SignUpRequest>,
+    const { formState, register, handleSubmit } = useForm<SignUpRequest>(
+        USE_FORM_CONFIG<SignUpRequest>(
+            DEFAULT_VALUES,
+            signUpSchema as ObjectSchema<SignUpRequest>,
         ),
-        defaultValues: {
-            email: '',
-            username: '',
-            password: '',
-            confirmPassword: '',
-        },
-        mode: 'onChange',
-        reValidateMode: 'onChange',
-    });
+    );
     const { isDirty, isSubmitting, isValid, errors } = formState;
 
     const onCancel = () => {
@@ -50,7 +50,7 @@ const SignupForm = () => {
             if (userConfirmed) {
                 router.push('/');
             } else {
-                router.push('/confirm-user');
+                router.push('/auth/confirm-user');
             }
         } catch (error: unknown) {
             console.error(error);
