@@ -26,7 +26,6 @@ export default class AuthService {
         this.userPool = new CognitoUserPool({
             ClientId: CLIENT_ID ?? '',
             UserPoolId: USER_POOL_ID ?? '',
-            // Storage: localStorage, // TODO: Implement a better storage solution
         });
     }
 
@@ -228,7 +227,7 @@ export default class AuthService {
                     reject(error);
                     return;
                 }
-                resolve(session.getIdToken().getJwtToken());
+                resolve(session.getIdToken());
             });
         });
     }

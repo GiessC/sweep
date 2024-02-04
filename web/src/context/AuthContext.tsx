@@ -53,6 +53,7 @@ export interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
+    // TODO: Automatically log users out/refresh token if token is expired
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const auth = useAuth();
 

@@ -4,7 +4,9 @@ import deletePostHandler from '../../features/posts/endpoints/DeletePostEndpoint
 import editPostHandler from '../../features/posts/endpoints/EditPostEndpoint';
 import getAllPostsHandler from '../../features/posts/endpoints/GetAllPostsEndpoint';
 import getPostHandler from '../../features/posts/endpoints/GetPostEndpoint';
-import jwtValidate from '../../middleware/Jwt';
+import canDeletePost from '../../features/posts/middleware/canDeletePost';
+import canEditPost from '../../features/posts/middleware/canEditPost';
+import verifyJwt from '../../middleware/jwt';
 import {
     createPostRequestValidators,
     deletePostRequestValidators,
@@ -35,7 +37,7 @@ const router: Router = Router();
  *       200:
  *         description: Returns a mysterious string.
  */
-router.post('/', ...createPostRequestValidators, createPostHandler);
+router.post('/', ...createPostRequestValidators, verifyJwt, createPostHandler);
 
 /**
  * @openapi
@@ -48,12 +50,7 @@ router.post('/', ...createPostRequestValidators, createPostHandler);
  *       200:
  *         description: Returns a list of all posts
  */
-router.get(
-    '/',
-    ...getAllPostsRequestValidators,
-    jwtValidate,
-    getAllPostsHandler,
-);
+router.get('/', ...getAllPostsRequestValidators, getAllPostsHandler);
 
 /**
  * @openapi
@@ -99,7 +96,13 @@ router.get('/:slug', ...getPostRequestValidators, getPostHandler);
  *         type: string
  *         description: The updated content of the post.
  */
-router.patch('/:slug', ...editPostRequestValidators, editPostHandler);
+router.patch(
+    '/:slug',
+    ...editPostRequestValidators,
+    verifyJwt,
+    canEditPost,
+    editPostHandler,
+);
 
 /**
  * @openapi
@@ -118,6 +121,12 @@ router.patch('/:slug', ...editPostRequestValidators, editPostHandler);
  *         required: true
  *         description: The slug of the post to delete.
  */
-router.delete('/:slug', ...deletePostRequestValidators, deletePostHandler);
+router.delete(
+    '/:slug',
+    ...deletePostRequestValidators,
+    verifyJwt,
+    canDeletePost,
+    deletePostHandler,
+);
 
 export default router;

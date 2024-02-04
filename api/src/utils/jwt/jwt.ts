@@ -1,17 +1,34 @@
-import { JwksClient, SigningKey } from 'jwks-rsa';
+import type { IncomingHttpHeaders } from 'http';
+import type { JwtPayload as IJwtPayload, Jwt } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import type { SigningKey } from 'jwks-rsa';
+import { JwksClient } from 'jwks-rsa';
 import awsConfig from '../../../config/awsConfig.json';
 
+export interface JwtPayload extends IJwtPayload {
+    roles: string[];
+}
 const jwkClient = new JwksClient({
-    jwksUri: awsConfig.CognitoUrl, // TODO: This should be in .env or some config
+    jwksUri: awsConfig.CognitoJwkUrl,
 });
 
 let signingKeys: SigningKey[] = [];
 
-const getSigningKeys = async () => {
+export const getSigningKeys = async () => {
     if (signingKeys.length === 0) {
         signingKeys = await jwkClient.getSigningKeys();
     }
     return signingKeys;
 };
 
-export default getSigningKeys;
+export const getTokenFromHeaders = (headers: IncomingHttpHeaders) => {
+    const tokenParts = headers.authorization?.split(' ');
+    if (!tokenParts || tokenParts.length !== 2) {
+        return null;
+    }
+    return tokenParts[1];
+};
+
+export const decodeJwt = (token: string): Jwt | null => {
+    return jwt.decode(token, { complete: true });
+};

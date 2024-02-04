@@ -3,11 +3,17 @@ import AuthService from '@/services/authentication/AuthService';
 
 const API_URL = envConfig.API.URL;
 
-const getHeaders = async (headers: Record<string, string> = {}) => ({
-    ...headers,
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${await AuthService.getInstance().getIdToken()}`,
-});
+const getHeaders = async (headers: Record<string, string> = {}) => {
+    const allHeaders: Record<string, string> = {
+        ...headers,
+        'Content-Type': 'application/json',
+    };
+    const idToken = await AuthService.getInstance().getIdToken();
+    if (idToken) {
+        allHeaders.Authorization = `Bearer ${idToken.getJwtToken()}`;
+    }
+    return allHeaders;
+};
 
 export const fetchGet = async <O = undefined>(
     url: string,
