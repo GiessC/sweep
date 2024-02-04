@@ -73,8 +73,8 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         const postDto = new PostDto(
             item.title,
             item.content,
-            'GetThisFromJWTToken',
-            'GetThisFromJWTToken',
+            item.author,
+            item.authorId,
         );
         await this._dynamoDb.send(
             new PutItemCommand({
@@ -86,8 +86,8 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
             new GetItemCommand({
                 TableName: PostDynamoDBProvider.TABLE_NAME,
                 Key: {
-                    pk: { S: PostDto.getPk(postDto.id) },
-                    sk: { S: PostDto.getSk(postDto.slug) },
+                    pk: { S: postDto.pk },
+                    sk: { S: postDto.sk },
                 },
             }),
         );

@@ -69,7 +69,6 @@ export default class AuthService {
             if (!cognitoUser) {
                 reject(
                     new NoAuthenticatedUserError(
-                        'NoAuthenticatedUser',
                         'No user is currently logged in.',
                     ),
                 );
@@ -184,7 +183,6 @@ export default class AuthService {
             if (!cognitoUser) {
                 reject(
                     new NoAuthenticatedUserError(
-                        'NoAuthenticatedUser',
                         'No user is currently logged in.',
                     ),
                 );
@@ -216,7 +214,6 @@ export default class AuthService {
             if (!cognitoUser) {
                 reject(
                     new NoAuthenticatedUserError(
-                        'NoAuthenticatedUser',
                         'No user is currently logged in.',
                     ),
                 );

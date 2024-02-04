@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import APIResponseBody from '../../../routes/APIResponseBody';
 import type { JwtPayload } from '../../../utils/jwt/jwt';
 import { decodeJwt, getTokenFromHeaders } from '../../../utils/jwt/jwt';
@@ -15,7 +16,7 @@ const canEditPost = async (
         const body: APIResponseBody<null> = {
             message: 'You are not authorized to perform this action.',
         };
-        response.status(401).send(body);
+        response.status(StatusCodes.UNAUTHORIZED).send(body);
         return;
     }
     const decoded = decodeJwt(token);
@@ -23,7 +24,7 @@ const canEditPost = async (
         const body: APIResponseBody<null> = {
             message: 'You are not authorized to perform this action.',
         };
-        response.status(401).send(body);
+        response.status(StatusCodes.UNAUTHORIZED).send(body);
         return;
     }
     const payload: JwtPayload = decoded.payload as JwtPayload;
@@ -34,14 +35,14 @@ const canEditPost = async (
         const body: APIResponseBody<null> = {
             message: 'Could not find post.',
         };
-        response.status(404).send(body);
+        response.status(StatusCodes.NOT_FOUND).send(body);
         return;
     }
     if (post.authorId !== userId) {
         const body: APIResponseBody<null> = {
             message: 'You do not have permission to perform this action.',
         };
-        response.status(403).send(body);
+        response.status(StatusCodes.FORBIDDEN).send(body);
         return;
     }
     next();

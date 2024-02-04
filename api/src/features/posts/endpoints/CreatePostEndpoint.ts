@@ -3,12 +3,36 @@ import { validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import APIResponseBody from '../../../routes/APIResponseBody';
 import { CREATE_SUCCESS } from '../../../types/SuccessMessages';
+import {
+    JwtPayload,
+    decodeJwt,
+    getTokenFromHeaders,
+} from '../../../utils/jwt/jwt';
 import Post from '../models/domain/Post';
 import { getPostDBProvider } from '../providers/IPostDBProvider';
 import IPostRepository from '../repositories/IPostRepository';
 import PostRepository from '../repositories/PostRepository';
 
 const createPostHandler = async (request: Request, response: Response) => {
+    const token = getTokenFromHeaders(request.headers);
+    if (!token) {
+        const body: APIResponseBody<null> = {
+            message: 'You are not authorized to perform this action.',
+        };
+        response.status(StatusCodes.UNAUTHORIZED).send(body);
+        return;
+    }
+    const decodedToken = decodeJwt(token);
+    if (!decodedToken) {
+        const body: APIResponseBody<null> = {
+            message: 'You are not authorized to perform this action.',
+        };
+        response.status(StatusCodes.UNAUTHORIZED).send(body);
+        return;
+    }
+    const payload: JwtPayload = decodedToken.payload as JwtPayload;
+    const userId = payload['sub'] as string;
+    const username = payload['cognito:username'];
     const requestBody = await request.body;
     const result = validationResult(request);
     if (!result.isEmpty()) {
@@ -26,6 +50,8 @@ const createPostHandler = async (request: Request, response: Response) => {
     const post: Post | null = await repository.create({
         title: requestBody.title,
         content: requestBody.content,
+        author: username,
+        authorId: userId,
     });
 
     const body: APIResponseBody<Post | null> = {

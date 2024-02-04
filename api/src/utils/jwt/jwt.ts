@@ -6,6 +6,7 @@ import { JwksClient } from 'jwks-rsa';
 import awsConfig from '../../../config/awsConfig.json';
 
 export interface JwtPayload extends IJwtPayload {
+    'cognito:username': string;
     roles: string[];
 }
 const jwkClient = new JwksClient({

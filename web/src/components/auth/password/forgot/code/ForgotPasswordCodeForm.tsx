@@ -5,6 +5,7 @@ import {
     NOT_CONFIRMED,
     TOO_MANY_REQUESTS,
 } from '@/errors/ErrorMessages';
+import NoUsernameStoredError from '@/errors/authentication/NoUsernameStoredError';
 import forgotPasswordCodeSchema from '@/features/auth/password/forgot/code/schema';
 import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
@@ -55,7 +56,9 @@ const ForgotPasswordCodeForm = () => {
         try {
             const username = getItem('username');
             if (!username) {
-                throw new Error('No username found'); // TODO: Make this a custom error
+                throw new NoUsernameStoredError(
+                    'No username stored. Please try again.',
+                );
             }
             await confirmPassword(username, formData.code, formData.password);
             showAlert('Password changed successfully.', 'success');
