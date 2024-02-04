@@ -1,0 +1,3 @@
+{
+    "CognitoUrl": "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_GKvnGdsHG/.well-known/jwks.json"
+}

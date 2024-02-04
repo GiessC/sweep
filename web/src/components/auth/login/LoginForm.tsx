@@ -21,9 +21,9 @@ import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 
-const useAlert =
-    () =>
-    (..._: unknown[]) => {}; // TODO: We need some sort of alert/notification system!
+const useAlert = () => (message: string, severity: string) => {
+    console.log(message, severity);
+};
 
 const DEFAULT_VALUES: LoginRequest = {
     username: '',

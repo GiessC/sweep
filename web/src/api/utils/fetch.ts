@@ -1,70 +1,69 @@
 import envConfig from '@/config/env';
+import AuthService from '@/services/authentication/AuthService';
 
 const API_URL = envConfig.API.URL;
 
-export const fetchGet = <O = undefined>(
+const getHeaders = async (headers: Record<string, string> = {}) => ({
+    ...headers,
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${await AuthService.getInstance().getIdToken()}`,
+});
+
+export const fetchGet = async <O = undefined>(
     url: string,
     urlParams?: O,
     headers?: Record<string, string>,
 ): Promise<Response> => {
+    const allHeaders = await getHeaders(headers);
     return fetch(
         `${API_URL}${url}?${new URLSearchParams({
             ...urlParams,
         })}`,
         {
-            headers: {
-                ...headers,
-                'Content-Type': 'application/json',
-            },
+            headers: allHeaders,
             method: 'GET',
             mode: 'cors',
         },
     );
 };
 
-export const fetchPost = <O = undefined>(
+export const fetchPost = async <O = undefined>(
     url: string,
     body?: O,
     headers?: Record<string, string>,
 ): Promise<Response> => {
+    const allHeaders = await getHeaders(headers);
     return fetch(`${API_URL}${url}`, {
         body: JSON.stringify(body),
-        headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-        },
+        headers: allHeaders,
         method: 'POST',
         mode: 'cors',
     });
 };
 
-export const fetchPatch = <O = undefined>(
+export const fetchPatch = async <O = undefined>(
     url: string,
     body?: O,
     headers?: Record<string, string>,
 ): Promise<Response> => {
+    const allHeaders = await getHeaders(headers);
     return fetch(`${API_URL}${url}`, {
         body: JSON.stringify(body),
-        headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-        },
+        headers: allHeaders,
         method: 'PATCH',
         mode: 'cors',
     });
 };
 
-export const fetchDelete = <O = undefined>(
+export const fetchDelete = async <O = undefined>(
     url: string,
     body?: O,
     headers?: Record<string, string>,
 ): Promise<Response> => {
+    const allHeaders = await getHeaders(headers);
     return fetch(`${API_URL}${url}`, {
         body: JSON.stringify(body),
-        headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-        },
+        headers: allHeaders,
         method: 'DELETE',
         mode: 'cors',
     });

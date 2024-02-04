@@ -5,7 +5,7 @@ import type {
 } from '@/hooks/useAuth';
 import { useAuth } from '@/hooks/useAuth';
 import { getItem } from '@/utils/localStorage';
-import { ISignUpResult } from 'amazon-cognito-identity-js';
+import { CognitoIdToken, ISignUpResult } from 'amazon-cognito-identity-js';
 import { createContext, useEffect, useState } from 'react';
 
 export interface IAuthContext {
@@ -32,6 +32,7 @@ export interface IAuthContext {
         currentPassword: string,
         newPassword: string,
     ) => Promise<void>;
+    getIdToken: () => Promise<CognitoIdToken | undefined>;
 }
 
 export const AuthContext = createContext<IAuthContext>({
@@ -44,6 +45,7 @@ export const AuthContext = createContext<IAuthContext>({
     forgotPassword: () => Promise.resolve(),
     confirmPassword: () => Promise.resolve(),
     resetPassword: () => Promise.resolve(),
+    getIdToken: () => Promise.resolve(undefined),
 });
 
 export interface AuthProviderProps {

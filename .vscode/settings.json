@@ -5,5 +5,8 @@
     "editor.insertSpaces": true,
     "[terraform]": {
         "editor.defaultFormatter": "hashicorp.terraform"
-    }
+    },
+    "cSpell.words": [
+        "expressjwt"
+    ]
 }

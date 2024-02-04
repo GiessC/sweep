@@ -8,12 +8,19 @@ export default class UserDto {
     public readonly sk: string;
     public readonly id: string;
     public readonly username: string;
+    public readonly roles: string[];
     public readonly createdAt: string;
     public readonly updatedAt: string;
 
-    public constructor(username: string, createdAt?: Date, updatedAt?: Date) {
+    public constructor(
+        username: string,
+        roles: string[],
+        createdAt?: Date,
+        updatedAt?: Date,
+    ) {
         this.id = uuidv4();
         this.username = username;
+        this.roles = roles;
         this.pk = UserDto.getPk(this.id);
         this.sk = UserDto.getSk(this.username);
         this.createdAt = DBDate.toDBDate(createdAt ?? new Date());

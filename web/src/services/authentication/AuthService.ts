@@ -2,6 +2,7 @@ import envConfig from '@/config/env';
 import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUserError';
 import {
     AuthenticationDetails,
+    CognitoIdToken,
     CognitoUser,
     CognitoUserAttribute,
     CognitoUserPool,
@@ -207,6 +208,28 @@ export default class AuthService {
                     resolve();
                 },
             );
+        });
+    }
+
+    public async getIdToken(): Promise<CognitoIdToken | undefined> {
+        return await new Promise((resolve, reject) => {
+            const cognitoUser = this.userPool.getCurrentUser();
+            if (!cognitoUser) {
+                reject(
+                    new NoAuthenticatedUserError(
+                        'NoAuthenticatedUser',
+                        'No user is currently logged in.',
+                    ),
+                );
+                return;
+            }
+            cognitoUser.getSession((error: Error | null, session?: any) => {
+                if (!!error) {
+                    reject(error);
+                    return;
+                }
+                resolve(session.getIdToken().getJwtToken());
+            });
         });
     }
 

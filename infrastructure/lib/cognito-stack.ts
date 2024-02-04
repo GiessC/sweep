@@ -31,7 +31,12 @@ export class CognitoStack extends Stack {
         this.userPool = this.setupUserPool();
         this.addUserPoolClient();
 
-        this.addPostConfirmationTrigger();
+        this.addPostConfirmationTrigger(
+            `${id}-post-confirmation-trigger-fn`.toLowerCase(),
+        );
+        this.addPreTokenGenerationTrigger(
+            `${id}-pre-token-generation-trigger-fn`.toLowerCase(),
+        );
     }
 
     private setupUserPool(): UserPool {
@@ -98,7 +103,7 @@ export class CognitoStack extends Stack {
         this.userPool.addClient('sweep-user-pool-client');
     }
 
-    private addPostConfirmationTrigger(): void {
+    private addPostConfirmationTrigger(id: string): void {
         const lambdaRole = new Role(this, 'post-confirmation-lambda-role', {
             assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
         });
@@ -106,23 +111,55 @@ export class CognitoStack extends Stack {
             actions: ['dynamodb:PutItem'],
             resources: [this.usersTableArn],
         });
+        lambdaRole.addManagedPolicy({
+            managedPolicyArn:
+                'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
+        });
         lambdaRole.addToPolicy(dynamoPolicy);
-        this.postConfirmationHandler = new NodejsFunction(
-            this,
-            'post-confirmation-trigger-fn',
-            {
-                entry: path.resolve(
-                    __dirname,
-                    'lambda/PostConfirmationTriggerCognito.ts',
-                ),
-                handler: 'handler',
-                runtime: Runtime.NODEJS_LATEST,
-                role: lambdaRole,
-            },
-        );
+        this.postConfirmationHandler = new NodejsFunction(this, id, {
+            functionName: 'post-confirmation-trigger-fn',
+            entry: path.resolve(
+                __dirname,
+                'lambda/PostConfirmationTriggerCognito.ts',
+            ),
+            handler: 'handler',
+            runtime: Runtime.NODEJS_LATEST,
+            role: lambdaRole,
+        });
+
         this.userPool.addTrigger(
             UserPoolOperation.POST_CONFIRMATION,
             this.postConfirmationHandler,
+        );
+    }
+
+    private addPreTokenGenerationTrigger(id: string): void {
+        const lambdaRole = new Role(this, 'pre-token-generation-lambda-role', {
+            assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+        });
+        const dynamoPolicy = new PolicyStatement({
+            actions: ['dynamodb:GetItem'],
+            resources: [this.usersTableArn],
+        });
+        lambdaRole.addManagedPolicy({
+            managedPolicyArn:
+                'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
+        });
+        lambdaRole.addToPolicy(dynamoPolicy);
+        const preTokenGenerationHandler = new NodejsFunction(this, id, {
+            functionName: 'pre-token-generation-trigger-fn',
+            entry: path.resolve(
+                __dirname,
+                'lambda/PreTokenGenerationTriggerCognito.ts',
+            ),
+            handler: 'handler',
+            runtime: Runtime.NODEJS_LATEST,
+            role: lambdaRole,
+        });
+
+        this.userPool.addTrigger(
+            UserPoolOperation.PRE_TOKEN_GENERATION,
+            preTokenGenerationHandler,
         );
     }
 }

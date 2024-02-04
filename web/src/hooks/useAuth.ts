@@ -1,6 +1,6 @@
 import { IAuthContext } from '@/context/AuthContext';
 import AuthService from '@/services/authentication/AuthService';
-import { ISignUpResult } from 'amazon-cognito-identity-js';
+import { CognitoIdToken, ISignUpResult } from 'amazon-cognito-identity-js';
 
 export interface LoginRequest {
     username: string;
@@ -81,5 +81,8 @@ export const useAuth = (): Omit<
             currentPassword,
             newPassword,
         );
+    },
+    getIdToken: async (): Promise<CognitoIdToken | undefined> => {
+        return await AuthService.getInstance().getIdToken();
     },
 });

@@ -1,6 +1,5 @@
-import { AttributeValue, AttributeValueUpdate } from '@aws-sdk/client-dynamodb';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import JsonAble from '../db/JsonAble';
 
 export const mapFromDynamo = <T>(
     attributes: Record<string, AttributeValue>,

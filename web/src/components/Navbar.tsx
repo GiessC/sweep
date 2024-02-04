@@ -50,6 +50,7 @@ const Navbar = () => {
 
     const onLogout = () => {
         setLogoutModalOpen(true);
+        handleClose();
     };
 
     return (

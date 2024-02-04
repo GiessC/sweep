@@ -1,9 +1,3 @@
-import DynamoDB from '../../../db/DynamoDB';
-import {
-    mapToDynamo,
-    mapFromDynamoArray,
-    mapFromDynamo,
-} from '../../../utils/DynamoDBUtils';
 import {
     DeleteItemCommand,
     DynamoDB as DynamoDBClient,
@@ -12,12 +6,18 @@ import {
     ScanCommand,
     UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
-import IPostDBProvider from './IPostDBProvider';
-import PostDto from '../models/dto/PostDto';
-import PostEdit from '../models/requests/PostEdit';
-import PostCreate from '../models/requests/PostCreate';
 import { StatusCodes } from 'http-status-codes';
+import DynamoDB from '../../../db/DynamoDB';
 import DBDate from '../../../mapping/DBDate';
+import {
+    mapFromDynamo,
+    mapFromDynamoArray,
+    mapToDynamo,
+} from '../../../utils/dynamoDb/DynamoDBUtils';
+import PostDto from '../models/dto/PostDto';
+import PostCreate from '../models/requests/PostCreate';
+import PostEdit from '../models/requests/PostEdit';
+import IPostDBProvider from './IPostDBProvider';
 
 const getIdFromSlug = (slug: string) => {
     const slugSplit = slug.split('-u-');
