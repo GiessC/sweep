@@ -29,7 +29,7 @@ const canEditPost = async (
     }
     const payload: JwtPayload = decoded.payload as JwtPayload;
     const userId = payload['sub'];
-    const postRepository = PostRepository.getInstance(getPostDBProvider());
+    const postRepository = PostRepository.getInstance();
     const post = await postRepository.get(request.params.slug);
     if (!post) {
         const body: APIResponseBody<null> = {

@@ -18,9 +18,7 @@ const getAllPostsHandler = async (request: Request, response: Response) => {
         response.status(StatusCodes.BAD_REQUEST).send(body);
         return;
     }
-    const repository: IPostRepository = PostRepository.getInstance(
-        getPostDBProvider(),
-    );
+    const repository: IPostRepository = PostRepository.getInstance();
     const posts = await repository.getAll();
 
     const body: APIResponseBody<Post> = {

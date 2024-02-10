@@ -6,7 +6,9 @@ import Post from '../models/domain/Post';
 import PostDto from '../models/dto/PostDto';
 import PostCreate from '../models/requests/PostCreate';
 import PostEdit from '../models/requests/PostEdit';
-import IPostDBProvider from '../providers/IPostDBProvider';
+import IPostDBProvider, {
+    getPostDBProvider,
+} from '../providers/IPostDBProvider';
 import IPostRepository from './IPostRepository';
 
 export default class PostRepository implements IPostRepository {
@@ -52,7 +54,8 @@ export default class PostRepository implements IPostRepository {
         return await this.databaseProvider.delete(slug);
     }
 
-    public static getInstance(dbProvider: IPostDBProvider): PostRepository {
+    public static getInstance(): PostRepository {
+        const dbProvider = getPostDBProvider();
         if (!PostRepository._instance) {
             PostRepository._instance = new PostRepository(dbProvider);
         }

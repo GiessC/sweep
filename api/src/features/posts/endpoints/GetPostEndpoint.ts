@@ -20,9 +20,7 @@ const getPostHandler = async (request: Request, response: Response) => {
         response.status(StatusCodes.BAD_REQUEST).send(body);
         return;
     }
-    const repository: IPostRepository = PostRepository.getInstance(
-        getPostDBProvider(),
-    );
+    const repository: IPostRepository = PostRepository.getInstance();
     try {
         const post: Post | null = await repository.get(request.params.slug);
         if (!post) {

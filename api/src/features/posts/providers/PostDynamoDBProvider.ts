@@ -2,9 +2,13 @@ import {
     DeleteItemCommand,
     DynamoDB as DynamoDBClient,
     GetItemCommand,
+    InternalServerError as DynamoInternalServerError,
     PutItemCommand,
     ScanCommand,
     UpdateItemCommand,
+    ProvisionedThroughputExceededException,
+    RequestLimitExceeded,
+    ResourceNotFoundException,
 } from '@aws-sdk/client-dynamodb';
 import { StatusCodes } from 'http-status-codes';
 import DynamoDB from '../../../db/DynamoDB';
@@ -18,6 +22,9 @@ import PostDto from '../models/dto/PostDto';
 import PostCreate from '../models/requests/PostCreate';
 import PostEdit from '../models/requests/PostEdit';
 import IPostDBProvider from './IPostDBProvider';
+import RequestValidationError from '../../../errors/general/RequestValidationError';
+import InternalServerError from '../../../errors/general/InternalServerError';
+import ResourceNotFoundError from '../../../errors/general/ResourceNotFoundError';
 
 const getIdFromSlug = (slug: string) => {
     const slugSplit = slug.split('-u-');
@@ -34,13 +41,30 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
     }
 
     public async findAll(): Promise<PostDto[]> {
-        const response = await this._dynamoDb.send(
-            new ScanCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-            }),
-        );
-        if (!response.Items) return [];
-        return mapFromDynamoArray<PostDto>(response.Items);
+        try {
+            const response = await this._dynamoDb.send(
+                new ScanCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                }),
+            );
+            if (!response.Items) return [];
+            return mapFromDynamoArray<PostDto>(response.Items);
+        } catch (error: unknown) {
+            if (error instanceof DynamoInternalServerError) {
+                // TODO: Retry
+                throw new InternalServerError();
+            } else if (
+                error instanceof ProvisionedThroughputExceededException
+            ) {
+                throw new InternalServerError();
+            } else if (error instanceof RequestLimitExceeded) {
+                throw new InternalServerError();
+            } else if (error instanceof ResourceNotFoundException) {
+                throw new ResourceNotFoundError();
+            } else {
+                throw new InternalServerError();
+            }
+        }
     }
 
     public async findOne(slug: string): Promise<PostDto | null> {

@@ -21,9 +21,7 @@ const editPostHandler = async (request: Request, response: Response) => {
         response.status(StatusCodes.BAD_REQUEST).send(body);
         return;
     }
-    const repository: IPostRepository = PostRepository.getInstance(
-        getPostDBProvider(),
-    );
+    const repository: IPostRepository = PostRepository.getInstance();
     const post: Post | null = await repository.edit(
         request.params.slug,
         new PostEdit(requestBody.title, requestBody.content),

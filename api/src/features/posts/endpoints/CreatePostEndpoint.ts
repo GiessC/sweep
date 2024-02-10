@@ -16,18 +16,10 @@ import PostRepository from '../repositories/PostRepository';
 const createPostHandler = async (request: Request, response: Response) => {
     const token = getTokenFromHeaders(request.headers);
     if (!token) {
-        const body: APIResponseBody<null> = {
-            message: 'You are not authorized to perform this action.',
-        };
-        response.status(StatusCodes.UNAUTHORIZED).send(body);
         return;
     }
     const decodedToken = decodeJwt(token);
     if (!decodedToken) {
-        const body: APIResponseBody<null> = {
-            message: 'You are not authorized to perform this action.',
-        };
-        response.status(StatusCodes.UNAUTHORIZED).send(body);
         return;
     }
     const payload: JwtPayload = decodedToken.payload as JwtPayload;
@@ -44,9 +36,7 @@ const createPostHandler = async (request: Request, response: Response) => {
         return;
     }
 
-    const repository: IPostRepository = PostRepository.getInstance(
-        getPostDBProvider(),
-    );
+    const repository: IPostRepository = PostRepository.getInstance();
     const post: Post | null = await repository.create({
         title: requestBody.title,
         content: requestBody.content,
