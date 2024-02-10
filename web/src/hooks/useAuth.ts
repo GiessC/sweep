@@ -19,10 +19,7 @@ export interface ConfirmUserRequest {
     code: string;
 }
 
-export const useAuth = (): Omit<
-    IAuthContext,
-    'isAuthenticated' | 'setIsAuthenticated'
-> => ({
+export const useAuth = (): Omit<IAuthContext, 'user'> => ({
     login: async (
         request: LoginRequest,
         redirectToMfa: () => void,

@@ -24,20 +24,16 @@ const LogoutModal = ({ isOpen, setIsOpen }: LogoutModalProps) => {
     const router = useRouter();
     const showAlert = useAlert();
     const [loggingOut, setLoggingOut] = useState<boolean>(false);
-    const { logout, setIsAuthenticated } = useContext(AuthContext);
+    const { logout } = useContext(AuthContext);
 
     const onLogout = async () => {
         setLoggingOut(true);
         try {
             await logout();
-            setItem('isAuthenticated', 'false');
-            setIsAuthenticated(false);
             setIsOpen(false);
             router.push('/auth/login');
         } catch (error: unknown) {
             if (isAWSError(error, 'NotAuthorizedException')) {
-                setItem('isAuthenticated', 'false');
-                setIsAuthenticated(false);
                 setIsOpen(false);
                 router.push('/auth/login');
             } else if (isAWSError(error, 'TooManyRequestsException')) {

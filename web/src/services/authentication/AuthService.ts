@@ -1,12 +1,17 @@
 import envConfig from '@/config/env';
 import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUserError';
-import {
-    AuthenticationDetails,
+import type {
+    CognitoAccessToken,
     CognitoIdToken,
-    CognitoUser,
-    CognitoUserAttribute,
-    CognitoUserPool,
+    CognitoRefreshToken,
+    CognitoUserSession,
     ISignUpResult,
+} from 'amazon-cognito-identity-js';
+import {
+    CognitoUserPool,
+    CognitoUser,
+    AuthenticationDetails,
+    CognitoUserAttribute,
 } from 'amazon-cognito-identity-js';
 
 const USER_POOL_ID = envConfig.Cognito.USER_POOL_ID;
@@ -18,18 +23,43 @@ if (!CLIENT_ID || !USER_POOL_ID) {
     );
 }
 
+interface RefreshSessionResult {
+    accessToken: CognitoAccessToken;
+    idToken: CognitoIdToken;
+    refreshToken: CognitoRefreshToken;
+    clockDrift: number;
+}
+
+export interface UserAuth {
+    userId: string;
+    token: CognitoIdToken;
+    refreshToken: CognitoRefreshToken;
+}
+
 export default class AuthService {
     static #INSTANCE: AuthService | null = null;
     private readonly userPool: CognitoUserPool;
+    public user: UserAuth | null;
 
     public constructor() {
         this.userPool = new CognitoUserPool({
             ClientId: CLIENT_ID ?? '',
             UserPoolId: USER_POOL_ID ?? '',
         });
+        this.user = null;
     }
 
-    private async handleLoginSuccess(resolve: (value: boolean) => void) {
+    private async handleLoginSuccess(
+        session: CognitoUserSession,
+        resolve: (value: boolean) => void,
+    ) {
+        console.log('Successful login');
+        this.user = {
+            userId: session.getIdToken().decodePayload().sub,
+            refreshToken: session.getRefreshToken(),
+            token: session.getIdToken(),
+        };
+        console.log(this.user);
         resolve(true);
     }
 
@@ -55,7 +85,8 @@ export default class AuthService {
         });
         return await new Promise((resolve, reject) => {
             cognitoUser.authenticateUser(authenticationDetails, {
-                onSuccess: () => this.handleLoginSuccess(resolve),
+                onSuccess: (session: CognitoUserSession) =>
+                    this.handleLoginSuccess(session, resolve),
                 onFailure: (error: unknown) =>
                     this.handleLoginFailure(error, reject),
                 mfaRequired: () => redirectToMfa(),
@@ -135,7 +166,6 @@ export default class AuthService {
         redirectToForgotPasswordCode: () => void,
     ): Promise<void> {
         // TODO: Check if the email and username match (using DynamoDB)
-        // TODO: Check if the user has forgotten their password too recently (DynamoDB - needs added field in user table)
         return await new Promise((resolve, reject) => {
             const cognitoUser = new CognitoUser({
                 Username: username,
@@ -208,25 +238,55 @@ export default class AuthService {
         });
     }
 
+    public async refreshIdToken(): Promise<void> {
+        return await new Promise((resolve, reject) => {
+            if (!this.user) {
+                throw new NoAuthenticatedUserError();
+            }
+            const cognitoUser = this.userPool.getCurrentUser();
+            if (!cognitoUser) {
+                reject(new NoAuthenticatedUserError());
+                return;
+            }
+            cognitoUser.refreshSession(
+                this.user.refreshToken,
+                (error: unknown, result: RefreshSessionResult) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    this.user = {
+                        userId: result.idToken.decodePayload().sub,
+                        refreshToken: result.refreshToken,
+                        token: result.idToken,
+                    };
+                    resolve();
+                },
+            );
+        });
+    }
+
     public async getIdToken(): Promise<CognitoIdToken | undefined> {
         return await new Promise((resolve, reject) => {
             const cognitoUser = this.userPool.getCurrentUser();
             if (!cognitoUser) {
-                reject(
-                    new NoAuthenticatedUserError(
-                        'No user is currently logged in.',
-                    ),
-                );
+                reject(new NoAuthenticatedUserError());
                 return;
             }
-            cognitoUser.getSession((error: Error | null, session?: any) => {
-                if (!!error) {
-                    reject(error);
-                    return;
-                }
-                resolve(session.getIdToken());
-            });
+            cognitoUser.getSession(
+                (error: Error | null, session?: CognitoUserSession) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    resolve(session?.getIdToken());
+                },
+            );
         });
+    }
+
+    public forceLogout(): void {
+        this.user = null;
     }
 
     public static getInstance(): AuthService {

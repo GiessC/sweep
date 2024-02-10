@@ -1,16 +1,21 @@
+import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUserError';
 import type {
     ConfirmUserRequest,
     LoginRequest,
     SignUpRequest,
 } from '@/hooks/useAuth';
 import { useAuth } from '@/hooks/useAuth';
-import { getItem } from '@/utils/localStorage';
-import { CognitoIdToken, ISignUpResult } from 'amazon-cognito-identity-js';
-import { createContext, useEffect, useState } from 'react';
+import AuthService, { UserAuth } from '@/services/authentication/AuthService';
+import type {
+    CognitoIdToken,
+    CognitoRefreshToken,
+    ISignUpResult,
+} from 'amazon-cognito-identity-js';
+import { useRouter } from 'next/navigation';
+import { createContext, useCallback, useEffect, useState } from 'react';
 
 export interface IAuthContext {
-    isAuthenticated: boolean;
-    setIsAuthenticated: (isAuthenticated: boolean) => void;
+    user: UserAuth | null;
     login: (
         request: LoginRequest,
         redirectToMfa: () => void,
@@ -36,8 +41,7 @@ export interface IAuthContext {
 }
 
 export const AuthContext = createContext<IAuthContext>({
-    isAuthenticated: false,
-    setIsAuthenticated: () => {},
+    user: null,
     login: () => Promise.resolve(false),
     logout: () => Promise.resolve(false),
     signUp: () => Promise.resolve(undefined),
@@ -53,20 +57,13 @@ export interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
-    // TODO: Automatically log users out/refresh token if token is expired
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const auth = useAuth();
-
-    useEffect(() => {
-        setIsAuthenticated(getItem('isAuthenticated') === 'true');
-    }, []);
 
     return (
         <AuthContext.Provider
             value={{
                 ...auth,
-                isAuthenticated,
-                setIsAuthenticated,
+                user: AuthService.getInstance().user,
             }}
         >
             {children}

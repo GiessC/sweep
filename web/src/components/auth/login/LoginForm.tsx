@@ -31,7 +31,7 @@ const DEFAULT_VALUES: LoginRequest = {
 };
 
 const LoginForm = () => {
-    const { login, setIsAuthenticated } = useContext(AuthContext);
+    const { login } = useContext(AuthContext);
     const router = useRouter();
     const showAlert = useAlert();
     const { formState, register, handleSubmit } = useForm<LoginRequest>(
@@ -48,8 +48,6 @@ const LoginForm = () => {
             const loggedIn = await login(formData, () => router.push('/mfa')); // TODO: We will probably need to pass some state here.
             setItem('username', formData.username);
             if (loggedIn) {
-                setItem('isAuthenticated', 'true');
-                setIsAuthenticated(true);
                 removeItem('username');
                 router.push('/');
             }

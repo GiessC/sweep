@@ -1,16 +1,24 @@
 import envConfig from '@/config/env';
 import AuthService from '@/services/authentication/AuthService';
+import type { UserAuth } from '@/services/authentication/AuthService';
 
 const API_URL = envConfig.API.URL;
+
+const tokenExpired = (user: UserAuth): boolean => {
+    return new Date(user.token.getExpiration()) <= new Date();
+};
 
 const getHeaders = async (headers: Record<string, string> = {}) => {
     const allHeaders: Record<string, string> = {
         ...headers,
         'Content-Type': 'application/json',
     };
-    const idToken = await AuthService.getInstance().getIdToken();
-    if (idToken) {
-        allHeaders.Authorization = `Bearer ${idToken.getJwtToken()}`;
+    const user = AuthService.getInstance().user;
+    if (user && tokenExpired(user)) {
+        await AuthService.getInstance().refreshIdToken();
+    }
+    if (user) {
+        allHeaders.Authorization = `Bearer ${user.token.getJwtToken()}`;
     }
     return allHeaders;
 };
