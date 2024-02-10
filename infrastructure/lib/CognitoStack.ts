@@ -100,7 +100,6 @@ export class CognitoStack extends Stack {
             ],
         });
         client.node.addDependency(this.userPool);
-        this.userPool.addClient('sweep-user-pool-client');
     }
 
     private addPostConfirmationTrigger(id: string): void {

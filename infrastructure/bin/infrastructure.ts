@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { App, Fn } from 'aws-cdk-lib';
 import 'source-map-support/register';
-import { CognitoStack } from '../lib/cognito-stack';
-import { DynamoStack } from '../lib/dynamo-stack';
+import { CognitoStack } from '../lib/CognitoStack';
+import { DynamoStack } from '../lib/DynamoStack';
 
 const app = new App();
 
