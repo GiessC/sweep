@@ -5,10 +5,11 @@ import AuthService from '@/services/authentication/AuthService';
 import { Button, Card, CardContent, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { BsTrash as DeleteIcon, BsPencil as EditIcon } from 'react-icons/bs';
 import DeletePostModal from '../DeletePostModal';
 import LoadingFullPost from './LoadingFullPost';
+import { AuthContext } from '@/context/AuthContext';
 
 export interface FullPostProps {
     post?: Post | null;
@@ -17,13 +18,9 @@ export interface FullPostProps {
 
 const FullPost = ({ post, isLoading = false }: FullPostProps) => {
     const router = useRouter();
+    const { getIdToken } = useContext(AuthContext);
     const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
     const [userId, setUserId] = useState<string | null>(null);
-
-    if (!isLoading && !post) {
-        router.push('/404');
-        return;
-    }
 
     const goToEdit = () => {
         if (!post) {
@@ -33,15 +30,20 @@ const FullPost = ({ post, isLoading = false }: FullPostProps) => {
         router.push(`/posts/${post.slug}/edit`);
     };
 
-    const getUserId = async () => {
-        const idToken = await AuthService.getInstance().getIdToken();
+    const getUserId = useCallback(async () => {
+        const idToken = await getIdToken();
         const decodedPayload = idToken?.decodePayload();
         setUserId(decodedPayload?.sub);
-    };
+    }, [getIdToken]);
 
     useEffect(() => {
         getUserId();
-    }, []);
+    }, [getUserId]);
+
+    if (!isLoading && !post) {
+        router.push('/404');
+        return;
+    }
 
     if (isLoading) {
         return <LoadingFullPost />;

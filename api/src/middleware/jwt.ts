@@ -14,19 +14,25 @@ const verifyJwt = async (
 ) => {
     const token = getTokenFromHeaders(request.headers);
     if (!token) {
-        response.status(StatusCodes.UNAUTHORIZED).send('Unauthorized');
+        response
+            .status(StatusCodes.UNAUTHORIZED)
+            .send('You are not authorized to perform this action.');
         return;
     }
     const decodedToken = decodeJwt(token);
     if (!decodedToken) {
-        response.status(StatusCodes.UNAUTHORIZED).send('Unauthorized');
+        response
+            .status(StatusCodes.UNAUTHORIZED)
+            .send('You are not authorized to perform this action.');
         return;
     }
     const kid = decodedToken.header.kid;
     const signingKeys = await getSigningKeys();
     const signingKey = signingKeys.find((key) => key.kid === kid);
     if (!signingKey) {
-        response.status(StatusCodes.UNAUTHORIZED).send('Unauthorized');
+        response
+            .status(StatusCodes.UNAUTHORIZED)
+            .send('You are not authorized to perform this action.');
         return;
     }
     try {
@@ -36,7 +42,9 @@ const verifyJwt = async (
         });
         next();
     } catch (error) {
-        response.status(StatusCodes.UNAUTHORIZED).send('Unauthorized');
+        response
+            .status(StatusCodes.UNAUTHORIZED)
+            .send('You are not authorized to perform this action.');
     }
 };
 
