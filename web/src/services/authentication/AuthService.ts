@@ -95,14 +95,11 @@ export default class AuthService {
     }
 
     public async logout(): Promise<boolean> {
-        return await new Promise((resolve, reject) => {
+        return await new Promise(async (resolve, reject) => {
+            await this.refreshIdToken();
             const cognitoUser = this.userPool.getCurrentUser();
             if (!cognitoUser) {
-                reject(
-                    new NoAuthenticatedUserError(
-                        'No user is currently logged in.',
-                    ),
-                );
+                reject(new NoAuthenticatedUserError());
                 return;
             }
             cognitoUser.getSession((error: Error | null) => {
@@ -211,11 +208,7 @@ export default class AuthService {
         return await new Promise((resolve, reject) => {
             const cognitoUser = this.userPool.getCurrentUser();
             if (!cognitoUser) {
-                reject(
-                    new NoAuthenticatedUserError(
-                        'No user is currently logged in.',
-                    ),
-                );
+                reject(new NoAuthenticatedUserError());
                 return;
             }
             cognitoUser.getSession((error: Error | null) => {
