@@ -9,9 +9,17 @@ import ErrorBase from '../../../errors/ErrorBase';
 
 export default class ErrorHandler {
     public static handleError(error: unknown, response: Response) {
+        const message = error instanceof Error ? error.message : UNKNOWN();
         const body: APIResponseBody<null> = {
-            message: error instanceof Error ? error.message : UNKNOWN(),
+            message,
             cause: error instanceof ErrorBase ? error.cause : undefined,
+            errors: [
+                {
+                    type: 'alternative',
+                    msg: message,
+                    nestedErrors: [],
+                },
+            ],
         };
         if (error instanceof InternalServerError) {
             response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(body);

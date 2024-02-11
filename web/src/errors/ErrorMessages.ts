@@ -16,7 +16,7 @@ export const ONE_OF = (friendlyNames: string[]) =>
 export const NOT_FOUND = (friendlyName: string, searchKey: string) =>
     `No ${friendlyName.toLowerCase()} found with the given ${searchKey}.`;
 
-export const INVALID_EMAIL = () => 'Please specify a valid email';
+export const INVALID_EMAIL = () => 'Please specify a valid email.';
 
 export const TOO_MANY_REQUESTS = () =>
     'You are making too many requests. Slow down!';

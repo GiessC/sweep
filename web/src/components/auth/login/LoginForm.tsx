@@ -3,7 +3,6 @@
 import { AuthContext } from '@/context/AuthContext';
 import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
 import loginSchema from '@/features/auth/login/schema';
-import type { LoginRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
 import { removeItem, setItem } from '@/utils/localStorage';
@@ -24,6 +23,11 @@ import { useForm } from 'react-hook-form';
 const useAlert = () => (message: string, severity: string) => {
     console.log(message, severity);
 };
+
+export interface LoginRequest {
+    username: string;
+    password: string;
+}
 
 const DEFAULT_VALUES: LoginRequest = {
     username: '',

@@ -3,7 +3,6 @@
 import { AuthContext } from '@/context/AuthContext';
 import { TOO_MANY_REQUESTS } from '@/errors/ErrorMessages';
 import signUpSchema from '@/features/auth/sign-up/schema';
-import { SignUpRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
 import { setItem } from '@/utils/localStorage';
@@ -21,7 +20,14 @@ import { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { ObjectSchema } from 'yup';
 
-const DEFAULT_VALUES = {
+export interface SignUpRequest {
+    email: string;
+    username: string;
+    password: string;
+    confirmPassword?: string;
+}
+
+const DEFAULT_VALUES: SignUpRequest = {
     email: '',
     username: '',
     password: '',

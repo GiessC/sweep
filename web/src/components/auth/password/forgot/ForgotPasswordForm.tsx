@@ -86,7 +86,7 @@ const ForgotPasswordForm = () => {
         <Box className='h-full'>
             <Typography variant='h4'>Forgot Password</Typography>
             <Typography variant='body1'>
-                Please provide your email and username. We will send you an
+                Please provide your username and email. We will send you an
                 email with a code to reset your password.
             </Typography>
             <form

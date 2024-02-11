@@ -3,7 +3,6 @@
 import { AuthContext } from '@/context/AuthContext';
 import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
 import confirmUserSchema from '@/features/auth/confirm-user/schema';
-import { ConfirmUserRequest } from '@/hooks/useAuth';
 import { isAWSError } from '@/utils/awsUtils';
 import { USE_FORM_CONFIG } from '@/utils/forms';
 import { getItem } from '@/utils/localStorage';
@@ -17,8 +16,13 @@ import {
     Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+
+export interface ConfirmUserRequest {
+    username: string;
+    code: string;
+}
 
 const DEFAULT_VALUES: ConfirmUserRequest = {
     code: '',
@@ -34,16 +38,20 @@ const useAlert = () => {
 const ConfirmUserForm = () => {
     const router = useRouter();
     const showAlert = useAlert();
-    const [username, setUsername] = useState<string>('');
     const { confirmUser } = useContext(AuthContext);
-    const { formState, register, handleSubmit } = useForm<ConfirmUserRequest>(
-        USE_FORM_CONFIG<ConfirmUserRequest>(DEFAULT_VALUES, confirmUserSchema),
-    );
+    const { formState, watch, register, handleSubmit, setValue } =
+        useForm<ConfirmUserRequest>(
+            USE_FORM_CONFIG<ConfirmUserRequest>(
+                DEFAULT_VALUES,
+                confirmUserSchema,
+            ),
+        );
     const { isValid, isSubmitting, isDirty, errors } = formState;
+    const username = watch('username');
 
     useEffect(() => {
-        setUsername(getItem('username') ?? '');
-    }, []);
+        setValue('username', getItem('username') ?? '');
+    }, [setValue]);
 
     if (!username) {
         return <>We forgot your username... awkward.</>;

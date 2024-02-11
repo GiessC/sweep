@@ -1,11 +1,11 @@
 import envConfig from '@/config/env';
 import AuthService from '@/services/authentication/AuthService';
-import type { UserAuth } from '@/services/authentication/AuthService';
+import type { CognitoIdToken } from 'amazon-cognito-identity-js';
 
 const API_URL = envConfig.API.URL;
 
-const tokenExpired = (user: UserAuth): boolean => {
-    return new Date(user.token.getExpiration()) <= new Date();
+const tokenExpired = (token: CognitoIdToken): boolean => {
+    return new Date(token.getExpiration()) <= new Date();
 };
 
 const getHeaders = async (headers: Record<string, string> = {}) => {
@@ -13,12 +13,13 @@ const getHeaders = async (headers: Record<string, string> = {}) => {
         ...headers,
         'Content-Type': 'application/json',
     };
-    let user = AuthService.getInstance().user;
-    if (user && tokenExpired(user)) {
-        user = await AuthService.getInstance().refreshIdToken();
+    const idToken = await AuthService.getInstance().getIdToken();
+    const refreshToken = await AuthService.getInstance().getRefreshToken();
+    if (idToken && refreshToken && tokenExpired(idToken)) {
+        await AuthService.getInstance().refreshIdToken(refreshToken);
     }
-    if (user) {
-        allHeaders.Authorization = `Bearer ${user.token.getJwtToken()}`;
+    if (idToken) {
+        allHeaders.Authorization = `Bearer ${idToken.getJwtToken()}`;
     }
     return allHeaders;
 };

@@ -1,4 +1,5 @@
 import envConfig from '@/config/env';
+import { UserAuth } from '@/context/AuthContext';
 import NoAuthenticatedUserError from '@/errors/authentication/NoAuthenticatedUserError';
 import type {
     CognitoAccessToken,
@@ -30,36 +31,22 @@ interface RefreshSessionResult {
     clockDrift: number;
 }
 
-export interface UserAuth {
-    userId: string;
-    token: CognitoIdToken;
-    refreshToken: CognitoRefreshToken;
-}
-
 export default class AuthService {
     static #INSTANCE: AuthService | null = null;
     private readonly userPool: CognitoUserPool;
-    public user: UserAuth | null;
 
     public constructor() {
         this.userPool = new CognitoUserPool({
             ClientId: CLIENT_ID ?? '',
             UserPoolId: USER_POOL_ID ?? '',
         });
-        this.user = null;
     }
 
     private async handleLoginSuccess(
-        session: CognitoUserSession,
+        callback: () => void,
         resolve: (value: boolean) => void,
     ) {
-        console.log('Successful login');
-        this.user = {
-            userId: session.getIdToken().decodePayload().sub,
-            refreshToken: session.getRefreshToken(),
-            token: session.getIdToken(),
-        };
-        console.log(this.user);
+        callback();
         resolve(true);
     }
 
@@ -74,6 +61,7 @@ export default class AuthService {
         username: string,
         password: string,
         redirectToMfa: () => void,
+        onSuccess: () => void,
     ): Promise<boolean> {
         const cognitoUser = new CognitoUser({
             Username: username,
@@ -85,8 +73,7 @@ export default class AuthService {
         });
         return await new Promise((resolve, reject) => {
             cognitoUser.authenticateUser(authenticationDetails, {
-                onSuccess: (session: CognitoUserSession) =>
-                    this.handleLoginSuccess(session, resolve),
+                onSuccess: () => this.handleLoginSuccess(onSuccess, resolve),
                 onFailure: (error: unknown) =>
                     this.handleLoginFailure(error, reject),
                 mfaRequired: () => redirectToMfa(),
@@ -94,9 +81,12 @@ export default class AuthService {
         });
     }
 
-    public async logout(): Promise<boolean> {
+    public async logout(
+        user: UserAuth | null,
+        onSuccess: () => void,
+    ): Promise<boolean> {
         return await new Promise(async (resolve, reject) => {
-            await this.refreshIdToken();
+            if (user) await this.refreshIdToken(user.refreshToken);
             const cognitoUser = this.userPool.getCurrentUser();
             if (!cognitoUser) {
                 reject(new NoAuthenticatedUserError());
@@ -109,7 +99,10 @@ export default class AuthService {
                 }
             });
             cognitoUser.globalSignOut({
-                onSuccess: () => resolve(true),
+                onSuccess: () => {
+                    onSuccess();
+                    resolve(true);
+                },
                 onFailure: reject,
             });
         });
@@ -141,7 +134,11 @@ export default class AuthService {
         });
     }
 
-    public async confirmUser(username: string, code: string): Promise<void> {
+    public async confirmUser(
+        username: string,
+        code: string,
+        onConfirm: () => void,
+    ): Promise<void> {
         return await new Promise((resolve, reject) => {
             const cognitoUser = new CognitoUser({
                 Username: username,
@@ -152,6 +149,7 @@ export default class AuthService {
                     reject(error);
                     return;
                 }
+                onConfirm();
                 resolve();
             });
         });
@@ -231,9 +229,11 @@ export default class AuthService {
         });
     }
 
-    public async refreshIdToken(): Promise<UserAuth> {
+    public async refreshIdToken(
+        refreshToken: CognitoRefreshToken,
+    ): Promise<UserAuth> {
         return await new Promise((resolve, reject) => {
-            if (!this.user) {
+            if (!refreshToken) {
                 throw new NoAuthenticatedUserError();
             }
             const cognitoUser = this.userPool.getCurrentUser();
@@ -242,22 +242,18 @@ export default class AuthService {
                 return;
             }
             cognitoUser.refreshSession(
-                this.user.refreshToken,
+                refreshToken,
                 (error: unknown, result: RefreshSessionResult) => {
                     if (error) {
                         reject(error);
                         return;
                     }
-                    this.user = {
+                    const newUser = {
                         userId: result.idToken.decodePayload().sub,
                         refreshToken: result.refreshToken,
                         token: result.idToken,
                     };
-                    resolve({
-                        userId: result.idToken.decodePayload().sub,
-                        refreshToken: result.refreshToken,
-                        token: result.idToken,
-                    });
+                    resolve(newUser);
                 },
             );
         });
@@ -282,8 +278,41 @@ export default class AuthService {
         });
     }
 
-    public forceLogout(): void {
-        this.user = null;
+    public async getRefreshToken(): Promise<CognitoRefreshToken | undefined> {
+        return await new Promise((resolve, reject) => {
+            const cognitoUser = this.userPool.getCurrentUser();
+            if (!cognitoUser) {
+                reject(new NoAuthenticatedUserError());
+                return;
+            }
+            cognitoUser.getSession(
+                (error: Error | null, session?: CognitoUserSession) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    resolve(session?.getRefreshToken());
+                },
+            );
+        });
+    }
+
+    public async getSession(): Promise<CognitoUserSession | null> {
+        return new Promise((resolve, reject) => {
+            const user = this.userPool.getCurrentUser();
+            if (!user) {
+                return resolve(null);
+            }
+            user.getSession(
+                (error: Error | null, session: CognitoUserSession | null) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    resolve(session);
+                },
+            );
+        });
     }
 
     public static getInstance(): AuthService {

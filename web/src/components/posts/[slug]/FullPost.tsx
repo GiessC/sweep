@@ -18,7 +18,7 @@ export interface FullPostProps {
 
 const FullPost = ({ post, isLoading = false }: FullPostProps) => {
     const router = useRouter();
-    const { getIdToken } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -31,10 +31,10 @@ const FullPost = ({ post, isLoading = false }: FullPostProps) => {
     };
 
     const getUserId = useCallback(async () => {
-        const idToken = await getIdToken();
+        const idToken = user?.token;
         const decodedPayload = idToken?.decodePayload();
         setUserId(decodedPayload?.sub);
-    }, [getIdToken]);
+    }, [user]);
 
     useEffect(() => {
         getUserId();
