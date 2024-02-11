@@ -17,7 +17,8 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import CodeInput from '../code-input/CodeInput';
 
 export interface ConfirmUserRequest {
     username: string;
@@ -39,7 +40,7 @@ const ConfirmUserForm = () => {
     const router = useRouter();
     const showAlert = useAlert();
     const { confirmUser } = useContext(AuthContext);
-    const { formState, watch, register, handleSubmit, setValue } =
+    const { formState, watch, register, handleSubmit, setValue, control } =
         useForm<ConfirmUserRequest>(
             USE_FORM_CONFIG<ConfirmUserRequest>(
                 DEFAULT_VALUES,
@@ -108,6 +109,20 @@ const ConfirmUserForm = () => {
                     enter it here.
                 </Typography>
                 <FormGroup className='mt-4'>
+                    <Controller
+                        name='code'
+                        control={control}
+                        defaultValue={DEFAULT_VALUES.code}
+                        render={({ field }) => (
+                            <CodeInput
+                                value={field.value}
+                                setValue={(value: string) => {
+                                    console.log(value);
+                                    setValue('code', value);
+                                }}
+                            />
+                        )}
+                    />
                     <TextField
                         {...register('code')}
                         name='code'
