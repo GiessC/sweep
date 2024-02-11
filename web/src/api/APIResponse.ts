@@ -10,6 +10,7 @@ export interface APIError {
 
 export default interface APIResponse<T> {
     message: string;
+    cause?: string;
     item?: T;
     items?: T[];
     errors?: APIError[];

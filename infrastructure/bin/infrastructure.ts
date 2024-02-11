@@ -1,12 +1,17 @@
 #!/usr/bin/env node
+import { App, Fn } from 'aws-cdk-lib';
 import 'source-map-support/register';
-import { App } from 'aws-cdk-lib';
-import { DynamoStack } from '../lib/dynamo-stack';
-import { CognitoStack } from '../lib/cognito-stack';
+import { CognitoStack } from '../lib/CognitoStack';
+import { DynamoStack } from '../lib/DynamoStack';
 
 const app = new App();
 
-new CognitoStack(app, 'sweep-cognito-stack');
-new DynamoStack(app, 'sweep-dynamo-stack');
+const dynamoStack = new DynamoStack(app, 'sweep-dynamo-stack');
+const cognitoStack = new CognitoStack(
+    app,
+    'sweep-cognito-stack',
+    Fn.importValue('UsersTableArn'),
+);
+cognitoStack.postConfirmationHandler.node.addDependency(dynamoStack.usersTable);
 
 app.synth();

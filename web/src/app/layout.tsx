@@ -1,10 +1,10 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
-import { UserProvider } from '@auth0/nextjs-auth0/client';
+import Navbar from '@/components/navbar/Navbar';
+import AuthProvider from '@/context/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import './globals.css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -15,19 +15,16 @@ export default function Layout({ children }: LayoutProps) {
 
     return (
         <html lang='en'>
-            <QueryClientProvider client={queryClient}>
-                <UserProvider
-                    loginUrl='/auth/login'
-                    profileUrl='/auth/me'
-                >
+            <AuthProvider>
+                <QueryClientProvider client={queryClient}>
                     <body className='w-screen h-screen'>
                         <div className='flex flex-col'>
                             <Navbar />
                             <div style={{ marginTop: 16 }}>{children}</div>
                         </div>
                     </body>
-                </UserProvider>
-            </QueryClientProvider>
+                </QueryClientProvider>
+            </AuthProvider>
         </html>
     );
 }

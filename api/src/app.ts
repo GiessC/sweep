@@ -1,31 +1,10 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { Express } from 'express';
-import { PoolConfig } from 'pg';
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { SwaggerContact } from '../config/config.json';
-import Database from '../database/Database';
-import { version } from '../package.json';
 import postsRouter from './routes/post/Post';
-
-const swaggerOptions: swaggerJSDoc.Options = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Sweep API',
-            version,
-            contact: SwaggerContact,
-            description: 'API for the sweep social media apps',
-            license: {
-                name: 'MIT',
-                url: 'https://opensource.org/licenses/MIT',
-            },
-        },
-    },
-    apis: ['./src/routes/*.ts'],
-};
-const openapiSpecification = swaggerJSDoc(swaggerOptions);
+import setupPostgres from './setup/postgres/PostgresSetup';
+import openapiSpecification from './setup/swagger/SwaggerSetup';
 
 if (process.env.NODE_ENV == 'local') {
     dotenv.config({ path: '.env.local' });
@@ -35,16 +14,7 @@ if (process.env.NODE_ENV == 'local') {
     dotenv.config({ path: '.env.development' });
 }
 
-const dbConfig: PoolConfig = {
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    max: 1,
-};
-
-export const database = Database.getInstance(dbConfig);
+export const postgres = setupPostgres();
 
 const app: Express = express();
 const port: number = isNaN(Number(process.env.PORT))

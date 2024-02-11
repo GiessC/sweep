@@ -1,0 +1,17 @@
+{
+    "Posts": {
+        "MIN_TITLE_LENGTH": 1,
+        "MAX_TITLE_LENGTH": 40,
+        "MIN_CONTENT_LENGTH": 1,
+        "MAX_CONTENT_LENGTH": 300
+    },
+    "Auth": {
+        "MIN_USERNAME_LENGTH": 3,
+        "MAX_USERNAME_LENGTH": 25,
+        "MIN_PASSWORD_LENGTH": 8,
+        "MIN_PASSWORD_LOWERCASE": 1,
+        "MIN_PASSWORD_UPPERCASE": 1,
+        "MIN_PASSWORD_NUMBER": 1,
+        "MIN_PASSWORD_SYMBOL": 1
+    }
+}

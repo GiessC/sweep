@@ -1,13 +1,15 @@
-import Post from '../models/domain/Post';
 import {
     postDtoArrayToDomain,
     postDtoToDomain,
 } from '../mapping/PostDtoMapping';
-import IPostDBProvider from '../providers/IPostDBProvider';
-import IPostRepository from './IPostRepository';
+import Post from '../models/domain/Post';
 import PostDto from '../models/dto/PostDto';
 import PostCreate from '../models/requests/PostCreate';
 import PostEdit from '../models/requests/PostEdit';
+import IPostDBProvider, {
+    getPostDBProvider,
+} from '../providers/IPostDBProvider';
+import IPostRepository from './IPostRepository';
 
 export default class PostRepository implements IPostRepository {
     private static _instance: PostRepository;
@@ -34,8 +36,8 @@ export default class PostRepository implements IPostRepository {
         const postDto = new PostDto(
             request.title,
             request.content,
-            'GetAuthorFromJWTToken',
-            'GetAuthorFromJWTToken',
+            request.author,
+            request.authorId,
         );
         const newPostDto = await this.databaseProvider.create(postDto);
         if (!newPostDto) return null;
@@ -52,7 +54,8 @@ export default class PostRepository implements IPostRepository {
         return await this.databaseProvider.delete(slug);
     }
 
-    public static getInstance(dbProvider: IPostDBProvider): PostRepository {
+    public static getInstance(): PostRepository {
+        const dbProvider = getPostDBProvider();
         if (!PostRepository._instance) {
             PostRepository._instance = new PostRepository(dbProvider);
         }

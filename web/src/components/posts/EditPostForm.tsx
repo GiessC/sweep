@@ -1,9 +1,8 @@
 import APIResponse, { APIError } from '@/api/APIResponse';
-import { editPostReqSchema } from '@/config/validationSchema';
-import { useGetPost } from '@/hooks/usePost';
+import editPostSchema from '@/features/posts/edit/schema';
 import Post from '@/models/posts/Post';
 import EditPostRequest from '@/models/posts/requests/EditPostRequest';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { USE_FORM_CONFIG } from '@/utils/forms';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -25,18 +24,17 @@ interface EditPostFormProps {
 }
 
 const EditPostForm = ({ post, mutateAsync }: EditPostFormProps) => {
+    const defaultValues = {
+        slug: post?.slug,
+        title: post?.title,
+        content: post?.content,
+    };
+
     const router = useRouter();
     const { formState, handleSubmit, register, setError } =
-        useForm<EditPostRequest>({
-            mode: 'onChange',
-            reValidateMode: 'onChange',
-            resolver: yupResolver<EditPostRequest>(editPostReqSchema),
-            defaultValues: {
-                slug: post?.slug,
-                title: post?.title,
-                content: post?.content,
-            },
-        });
+        useForm<EditPostRequest>(
+            USE_FORM_CONFIG<EditPostRequest>(defaultValues, editPostSchema),
+        );
     const { isSubmitting, errors, isDirty, isValid } = formState;
 
     const onCancel = () => {
