@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import DBDate from '../../../../mapping/DBDate';
+import Role from '../role/Role';
 
 export default class UserDto {
     static readonly #PK_PREFIX = 'User-';
@@ -8,13 +9,13 @@ export default class UserDto {
     public readonly sk: string;
     public readonly id: string;
     public readonly username: string;
-    public readonly roles: string[];
+    public readonly roles: Role[];
     public readonly createdAt: string;
     public readonly updatedAt: string;
 
     public constructor(
         username: string,
-        roles: string[],
+        roles: Role[],
         createdAt?: Date,
         updatedAt?: Date,
     ) {

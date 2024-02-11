@@ -33,7 +33,7 @@ export const handler = async (event: PostConfirmationTriggerEvent) => {
         );
     } catch (error: unknown) {
         console.error(error);
-    } finally {
-        return event;
+        throw error;
     }
+    return event;
 };

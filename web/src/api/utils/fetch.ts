@@ -13,9 +13,9 @@ const getHeaders = async (headers: Record<string, string> = {}) => {
         ...headers,
         'Content-Type': 'application/json',
     };
-    const user = AuthService.getInstance().user;
+    let user = AuthService.getInstance().user;
     if (user && tokenExpired(user)) {
-        await AuthService.getInstance().refreshIdToken();
+        user = await AuthService.getInstance().refreshIdToken();
     }
     if (user) {
         allHeaders.Authorization = `Bearer ${user.token.getJwtToken()}`;

@@ -231,7 +231,7 @@ export default class AuthService {
         });
     }
 
-    public async refreshIdToken(): Promise<void> {
+    public async refreshIdToken(): Promise<UserAuth> {
         return await new Promise((resolve, reject) => {
             if (!this.user) {
                 throw new NoAuthenticatedUserError();
@@ -253,7 +253,11 @@ export default class AuthService {
                         refreshToken: result.refreshToken,
                         token: result.idToken,
                     };
-                    resolve();
+                    resolve({
+                        userId: result.idToken.decodePayload().sub,
+                        refreshToken: result.refreshToken,
+                        token: result.idToken,
+                    });
                 },
             );
         });

@@ -62,8 +62,7 @@ const getUser = async (
     } catch (error: unknown) {
         if (error instanceof ResourceNotFoundException) {
             return undefined;
-        } else {
-            throw error;
         }
+        throw error;
     }
 };

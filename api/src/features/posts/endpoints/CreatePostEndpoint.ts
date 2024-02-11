@@ -12,6 +12,8 @@ import Post from '../models/domain/Post';
 import { getPostDBProvider } from '../providers/IPostDBProvider';
 import IPostRepository from '../repositories/IPostRepository';
 import PostRepository from '../repositories/PostRepository';
+import ErrorHandler from '../services/ErrorHandler';
+import { validateRequest } from '../../../utils/validation/validation';
 
 const createPostHandler = async (request: Request, response: Response) => {
     const token = getTokenFromHeaders(request.headers);
@@ -26,29 +28,25 @@ const createPostHandler = async (request: Request, response: Response) => {
     const userId = payload['sub'] as string;
     const username = payload['cognito:username'];
     const requestBody = await request.body;
-    const result = validationResult(request);
-    if (!result.isEmpty()) {
-        const body: APIResponseBody<Post | null> = {
-            message: 'One or more errors occurred.',
-            errors: result.array(),
-        };
-        response.status(StatusCodes.BAD_REQUEST).send(body);
-        return;
-    }
+
+    validateRequest(request, response);
 
     const repository: IPostRepository = PostRepository.getInstance();
-    const post: Post | null = await repository.create({
-        title: requestBody.title,
-        content: requestBody.content,
-        author: username,
-        authorId: userId,
-    });
-
-    const body: APIResponseBody<Post | null> = {
-        message: CREATE_SUCCESS('Post'),
-        item: post,
-    };
-    response.status(StatusCodes.OK).send(body);
+    try {
+        const post: Post | null = await repository.create({
+            title: requestBody.title,
+            content: requestBody.content,
+            author: username,
+            authorId: userId,
+        });
+        const body: APIResponseBody<Post | null> = {
+            message: CREATE_SUCCESS('Post'),
+            item: post,
+        };
+        response.status(StatusCodes.OK).send(body);
+    } catch (error: unknown) {
+        ErrorHandler.handleError(error, response);
+    }
 };
 
 export default createPostHandler;

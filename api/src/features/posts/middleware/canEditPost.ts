@@ -13,18 +13,10 @@ const canEditPost = async (
 ) => {
     const token = getTokenFromHeaders(request.headers);
     if (!token) {
-        const body: APIResponseBody<null> = {
-            message: 'You are not authorized to perform this action.',
-        };
-        response.status(StatusCodes.UNAUTHORIZED).send(body);
         return;
     }
     const decoded = decodeJwt(token);
     if (!decoded) {
-        const body: APIResponseBody<null> = {
-            message: 'You are not authorized to perform this action.',
-        };
-        response.status(StatusCodes.UNAUTHORIZED).send(body);
         return;
     }
     const payload: JwtPayload = decoded.payload as JwtPayload;

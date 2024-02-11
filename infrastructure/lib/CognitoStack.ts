@@ -12,7 +12,7 @@ import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import path = require('path');
+import { resolve } from 'path';
 
 export class CognitoStack extends Stack {
     private readonly userPool: UserPool;
@@ -117,7 +117,7 @@ export class CognitoStack extends Stack {
         lambdaRole.addToPolicy(dynamoPolicy);
         this.postConfirmationHandler = new NodejsFunction(this, id, {
             functionName: 'post-confirmation-trigger-fn',
-            entry: path.resolve(
+            entry: resolve(
                 __dirname,
                 'lambda/PostConfirmationTriggerCognito.ts',
             ),
@@ -147,7 +147,7 @@ export class CognitoStack extends Stack {
         lambdaRole.addToPolicy(dynamoPolicy);
         const preTokenGenerationHandler = new NodejsFunction(this, id, {
             functionName: 'pre-token-generation-trigger-fn',
-            entry: path.resolve(
+            entry: resolve(
                 __dirname,
                 'lambda/PreTokenGenerationTriggerCognito.ts',
             ),

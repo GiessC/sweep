@@ -9,6 +9,9 @@ import {
     ProvisionedThroughputExceededException,
     RequestLimitExceeded,
     ResourceNotFoundException,
+    ConditionalCheckFailedException,
+    ItemCollectionSizeLimitExceededException,
+    TransactionConflictException,
 } from '@aws-sdk/client-dynamodb';
 import { StatusCodes } from 'http-status-codes';
 import DynamoDB from '../../../db/DynamoDB';
@@ -32,6 +35,7 @@ const getIdFromSlug = (slug: string) => {
 };
 
 export default class PostDynamoDBProvider implements IPostDBProvider {
+    // TODO: Add logging to this. This will log more technical error messages that we don't want the client seeing.
     private static readonly TABLE_NAME = 'Sweep-Post';
     private static _instance: PostDynamoDBProvider;
     private _dynamoDb: DynamoDBClient;
@@ -52,12 +56,6 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
         } catch (error: unknown) {
             if (error instanceof DynamoInternalServerError) {
                 // TODO: Retry
-                throw new InternalServerError();
-            } else if (
-                error instanceof ProvisionedThroughputExceededException
-            ) {
-                throw new InternalServerError();
-            } else if (error instanceof RequestLimitExceeded) {
                 throw new InternalServerError();
             } else if (error instanceof ResourceNotFoundException) {
                 throw new ResourceNotFoundError();
@@ -81,15 +79,15 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
             );
             if (!response.Item) return null;
             return mapFromDynamo<PostDto>(response.Item);
-        } catch (error) {
-            console.log(error);
-            if (
-                error instanceof Error &&
-                error.name === 'ValidationException'
-            ) {
-                console.log('Validation exception');
+        } catch (error: unknown) {
+            if (error instanceof DynamoInternalServerError) {
+                // TODO: Retry
+                throw new InternalServerError();
+            } else if (error instanceof ResourceNotFoundException) {
+                throw new ResourceNotFoundError();
+            } else {
+                throw new InternalServerError();
             }
-            return null;
         }
     }
 
@@ -100,24 +98,35 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
             item.author,
             item.authorId,
         );
-        await this._dynamoDb.send(
-            new PutItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Item: mapToDynamo(postDto),
-            }),
-        );
-        const getResponse = await this._dynamoDb.send(
-            new GetItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: { S: postDto.pk },
-                    sk: { S: postDto.sk },
-                },
-            }),
-        );
-        const createdItem = getResponse.Item;
-        if (!createdItem) return null;
-        return mapFromDynamo<PostDto>(createdItem);
+        try {
+            await this._dynamoDb.send(
+                new PutItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Item: mapToDynamo(postDto),
+                }),
+            );
+            const getResponse = await this._dynamoDb.send(
+                new GetItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Key: {
+                        pk: { S: postDto.pk },
+                        sk: { S: postDto.sk },
+                    },
+                }),
+            );
+            const createdItem = getResponse.Item;
+            if (!createdItem) return null;
+            return mapFromDynamo<PostDto>(createdItem);
+        } catch (error: unknown) {
+            if (error instanceof InternalServerError) {
+                // TODO: Retry
+                throw new InternalServerError();
+            } else if (error instanceof ResourceNotFoundException) {
+                throw new ResourceNotFoundError();
+            } else {
+                throw new InternalServerError();
+            }
+        }
     }
 
     public async edit(slug: string, item: PostEdit): Promise<PostDto | null> {
@@ -126,47 +135,68 @@ export default class PostDynamoDBProvider implements IPostDBProvider {
             item.title,
             item.content,
         );
-        const getResponse = await this._dynamoDb.send(
-            new GetItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: { S: PostDto.getPk(id) },
-                    sk: { S: PostDto.getSk(slug) },
-                },
-            }),
-        );
-        if (!getResponse.Item) return null;
-        const updatedPostDto = mapFromDynamo<PostDto>(getResponse.Item);
-        await this._dynamoDb.send(
-            new UpdateItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: { S: PostDto.getPk(id) },
-                    sk: { S: PostDto.getSk(slug) },
-                },
-                UpdateExpression: updateExpression,
-                ExpressionAttributeValues: expressionValues,
-            }),
-        );
-        updatedPostDto.updatedAt = DBDate.toDBDate(new Date());
-        updatedPostDto.title = item.title ?? updatedPostDto.title;
-        updatedPostDto.content = item.content ?? updatedPostDto.content;
+        try {
+            const getResponse = await this._dynamoDb.send(
+                new GetItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Key: {
+                        pk: { S: PostDto.getPk(id) },
+                        sk: { S: PostDto.getSk(slug) },
+                    },
+                }),
+            );
+            if (!getResponse.Item) return null;
+            const updatedPostDto = mapFromDynamo<PostDto>(getResponse.Item);
+            await this._dynamoDb.send(
+                new UpdateItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Key: {
+                        pk: { S: PostDto.getPk(id) },
+                        sk: { S: PostDto.getSk(slug) },
+                    },
+                    UpdateExpression: updateExpression,
+                    ExpressionAttributeValues: expressionValues,
+                }),
+            );
+            updatedPostDto.updatedAt = DBDate.toDBDate(new Date());
+            updatedPostDto.title = item.title ?? updatedPostDto.title;
+            updatedPostDto.content = item.content ?? updatedPostDto.content;
 
-        return updatedPostDto;
+            return updatedPostDto;
+        } catch (error: unknown) {
+            if (error instanceof DynamoInternalServerError) {
+                // TODO: Retry
+                throw new InternalServerError();
+            } else if (error instanceof ResourceNotFoundException) {
+                throw new ResourceNotFoundError();
+            } else {
+                throw new InternalServerError();
+            }
+        }
     }
 
     public async delete(slug: string): Promise<boolean> {
         const id = getIdFromSlug(slug);
-        const response = await this._dynamoDb.send(
-            new DeleteItemCommand({
-                TableName: PostDynamoDBProvider.TABLE_NAME,
-                Key: {
-                    pk: { S: PostDto.getPk(id) },
-                    sk: { S: PostDto.getSk(slug) },
-                },
-            }),
-        );
-        return response.$metadata.httpStatusCode === StatusCodes.OK;
+        try {
+            const response = await this._dynamoDb.send(
+                new DeleteItemCommand({
+                    TableName: PostDynamoDBProvider.TABLE_NAME,
+                    Key: {
+                        pk: { S: PostDto.getPk(id) },
+                        sk: { S: PostDto.getSk(slug) },
+                    },
+                }),
+            );
+            return response.$metadata.httpStatusCode === StatusCodes.OK;
+        } catch (error: unknown) {
+            if (error instanceof DynamoInternalServerError) {
+                throw new InternalServerError();
+            } else if (error instanceof ResourceNotFoundException) {
+                throw new ResourceNotFoundError();
+            } else {
+                throw new InternalServerError();
+            }
+        }
     }
 
     public static getInstance(): PostDynamoDBProvider {
