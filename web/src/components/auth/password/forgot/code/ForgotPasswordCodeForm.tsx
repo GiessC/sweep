@@ -1,3 +1,6 @@
+'use client';
+
+import CodeInput from '@/components/auth/code-input/CodeInput';
 import { AuthContext } from '@/context/AuthContext';
 import {
     CODE_MISMATCH,
@@ -19,17 +22,17 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useRouter } from 'next/navigation';
 import { useContext } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { ObjectSchema } from 'yup';
 
 export interface ForgotPasswordCodeValues {
-    code: string;
+    code?: number;
     password: string;
     confirmPassword: string;
 }
 
 const DEFAULT_VALUES: ForgotPasswordCodeValues = {
-    code: '',
+    code: undefined,
     password: '',
     confirmPassword: '',
 };
@@ -43,7 +46,7 @@ const ForgotPasswordCodeForm = () => {
     const router = useRouter();
     const showAlert = useAlert();
     const { confirmPassword } = useContext(AuthContext);
-    const { formState, register, handleSubmit } =
+    const { formState, control, register, setValue, handleSubmit } =
         useForm<ForgotPasswordCodeValues>(
             USE_FORM_CONFIG<ForgotPasswordCodeValues>(
                 DEFAULT_VALUES,
@@ -60,7 +63,11 @@ const ForgotPasswordCodeForm = () => {
                     'No username stored. Please try again.',
                 );
             }
-            await confirmPassword(username, formData.code, formData.password);
+            await confirmPassword(
+                username,
+                `${formData.code}`,
+                formData.password,
+            );
             showAlert('Password changed successfully.', 'success');
             router.push('/auth/login');
         } catch (error: unknown) {
@@ -101,8 +108,8 @@ const ForgotPasswordCodeForm = () => {
         <Box className='h-full'>
             <Typography variant='h4'>Forgot Password</Typography>
             <Typography variant='body1'>
-                We've sent you an email with a code. Please enter it here and
-                provide your new password.
+                We&apos;ve sent you an email with a code. Please enter it here
+                and provide your new password.
             </Typography>
             <form
                 className='flex flex-col mt-2 space-y-4 justify-center self-center'
@@ -110,12 +117,19 @@ const ForgotPasswordCodeForm = () => {
                 noValidate
             >
                 <FormGroup>
-                    <TextField
-                        {...register('code')}
+                    <Controller
                         name='code'
-                        label='Code'
-                        error={!!errors.code}
-                        required
+                        control={control}
+                        defaultValue={DEFAULT_VALUES.code}
+                        render={() => (
+                            <CodeInput
+                                setValue={(value: number) => {
+                                    setValue('code', value);
+                                }}
+                                error={!!errors.code}
+                                required
+                            />
+                        )}
                     />
                     {errors.code && (
                         <FormHelperText error>

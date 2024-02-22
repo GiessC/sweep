@@ -1,3 +1,5 @@
+'use client';
+
 import { AuthContext } from '@/context/AuthContext';
 import { TOO_MANY_REQUESTS, UNKNOWN } from '@/errors/ErrorMessages';
 import forgotPasswordSchema from '@/features/auth/password/forgot/schema';

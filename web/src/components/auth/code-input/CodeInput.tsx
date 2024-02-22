@@ -1,17 +1,16 @@
-import { TextField, TextFieldProps } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import type { TextFieldProps } from '@mui/material/TextField';
 import { useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface CodeInputProps extends TextFieldProps<'standard'> {
     numberOfDigits?: number;
-    value: string;
-    setValue: (value: string) => void;
+    setValue: (value: number) => void;
 }
 
 const CodeInput = ({
     numberOfDigits = 6,
-    value: codeValue,
     setValue,
     ...props
 }: CodeInputProps) => {
@@ -21,7 +20,7 @@ const CodeInput = ({
     const ids = useMemo<string[]>(() => {
         const arr = [];
         for (let i = 0; i < numberOfDigits; i++) {
-            arr.push(uuidv4());
+            arr.push(`code-input-${i}`);
         }
         return arr;
     }, [numberOfDigits]);
@@ -31,12 +30,20 @@ const CodeInput = ({
         for (const letter of values) {
             code += letter;
         }
-        setValue(code);
+        setValue(Number(code));
     }, [setValue, values]);
 
+    const goToNext = (index: number) => {
+        document.getElementById(ids[index + 1])?.focus();
+    };
+
+    const goToPrevious = (index: number) => {
+        document.getElementById(ids[index - 1])?.focus();
+    };
+
     return (
-        <div className='flex space-x-4'>
-            {ids.map((id: string, index: number, array: string[]) => (
+        <div className='flex m-auto space-x-4'>
+            {ids.map((id: string, index: number) => (
                 <TextField
                     {...props}
                     className='w-12 rounded bg-white'
@@ -44,21 +51,11 @@ const CodeInput = ({
                     id={id}
                     inputProps={{
                         style: { textAlign: 'center' },
-                        maxLength: 1,
                         onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => {
-                            console.log(event.key, codeValue[index]);
-                            if (
-                                event.key === 'Backspace' &&
-                                !codeValue[index]
-                            ) {
-                                event.preventDefault();
-                                setValues((prev: string[]) => {
-                                    prev[index] = '';
-                                    return prev;
-                                });
-                                document
-                                    .getElementById(array[index - 1])
-                                    ?.focus();
+                            const key = event.key;
+                            const value = event.currentTarget.value;
+                            if (key == 'Backspace' && !value && index > 0) {
+                                goToPrevious(index);
                             }
                         },
                         ...props.inputProps,
@@ -66,16 +63,26 @@ const CodeInput = ({
                     value={values[index]}
                     onChange={(event: ChangeEvent<HTMLInputElement>) => {
                         const value = event.target.value;
-                        setValues((prev: string[]) => {
-                            prev[index] = value;
-                            return prev;
+                        if (value && isNaN(Number(value))) return;
+                        if (value.length > 1) {
+                            setValues((prevValues: string[]) => {
+                                const newValues = structuredClone(prevValues);
+                                newValues[index + 1] = value[1];
+                                return newValues;
+                            });
+                            goToNext(index);
+                            event.preventDefault();
+                            return;
+                        }
+                        setValues((prevValues: string[]) => {
+                            const newValues = structuredClone(prevValues);
+                            newValues[index] = value;
+                            return newValues;
                         });
-                        if (value) {
-                            if (index == numberOfDigits - 1) return;
-                            document.getElementById(array[index + 1])?.focus();
-                        } else {
-                            if (index == 0) return;
-                            document.getElementById(array[index - 1])?.focus();
+                        if (value && index < numberOfDigits - 1) {
+                            goToNext(index);
+                        } else if (!value && index > 0) {
+                            goToPrevious(index);
                         }
                     }}
                 />

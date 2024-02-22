@@ -12,7 +12,6 @@ import {
     FormGroup,
     FormHelperText,
     Stack,
-    TextField,
     Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
@@ -22,11 +21,11 @@ import CodeInput from '../code-input/CodeInput';
 
 export interface ConfirmUserRequest {
     username: string;
-    code: string;
+    code?: number[];
 }
 
 const DEFAULT_VALUES: ConfirmUserRequest = {
-    code: '',
+    code: Arra,
     username: '',
 };
 
@@ -40,7 +39,7 @@ const ConfirmUserForm = () => {
     const router = useRouter();
     const showAlert = useAlert();
     const { confirmUser } = useContext(AuthContext);
-    const { formState, watch, register, handleSubmit, setValue, control } =
+    const { formState, watch, handleSubmit, setValue, control } =
         useForm<ConfirmUserRequest>(
             USE_FORM_CONFIG<ConfirmUserRequest>(
                 DEFAULT_VALUES,
@@ -62,7 +61,6 @@ const ConfirmUserForm = () => {
         try {
             await confirmUser(request);
             router.push('/auth/login');
-            return;
         } catch (error: unknown) {
             if (isAWSError(error, 'CodeMismatchException')) {
                 showAlert('Incorrect code.', 'error');
@@ -95,6 +93,8 @@ const ConfirmUserForm = () => {
         router.back();
     };
 
+    console.log(isDirty, isValid, isSubmitting);
+
     return (
         <Box className='flex flex-col'>
             <form
@@ -115,21 +115,14 @@ const ConfirmUserForm = () => {
                         defaultValue={DEFAULT_VALUES.code}
                         render={({ field }) => (
                             <CodeInput
-                                value={field.value}
-                                setValue={(value: string) => {
-                                    console.log(value);
-                                    setValue('code', value);
+                                setValue={(code: number) => {
+                                    setValue('code', code);
                                 }}
+                                onBlur={field.onBlur}
+                                error={!!errors.code}
+                                required
                             />
                         )}
-                    />
-                    <TextField
-                        {...register('code')}
-                        name='code'
-                        label='Code'
-                        error={!!errors.code}
-                        required
-                        fullWidth
                     />
                     {!!errors.code && (
                         <FormHelperText error>

@@ -133,7 +133,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
             confirmUser: async (request: ConfirmUserRequest): Promise<void> => {
                 return await AuthService.getInstance().confirmUser(
                     request.username,
-                    request.code,
+                    `${request.code}`,
                     () => {
                         setAuthenticated(true);
                     },

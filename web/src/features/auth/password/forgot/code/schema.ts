@@ -1,5 +1,5 @@
 import Validation from '@/config/validation.json';
-import { MIN_LENGTH, REQUIRED } from '@/errors/ErrorMessages';
+import { EXACT_LENGTH, MIN_LENGTH, REQUIRED } from '@/errors/ErrorMessages';
 import * as Yup from 'yup';
 import YupPassword from 'yup-password';
 
@@ -14,7 +14,11 @@ export const MIN_PASSWORD_NUMBER = Validation.Auth.MIN_PASSWORD_NUMBER;
 export const MIN_PASSWORD_SYMBOL = Validation.Auth.MIN_PASSWORD_SYMBOL;
 
 const forgotPasswordCodeSchema = Yup.object({
-    code: Yup.string().nonNullable().required(REQUIRED('Code')),
+    code: Yup.number()
+        .nonNullable()
+        .required(REQUIRED('Code'))
+        .min(6, EXACT_LENGTH('Code', 6))
+        .max(6, EXACT_LENGTH('Code', 6)),
     password: Yup.string()
         .nonNullable()
         .required(REQUIRED('Password'))

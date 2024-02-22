@@ -7,6 +7,9 @@ export const MIN_LENGTH = (friendlyName: string, min: number) =>
 export const MAX_LENGTH = (friendlyName: string, max: number) =>
     `${friendlyName} must be at most ${max} characters.`;
 
+export const EXACT_LENGTH = (friendlyName: string, length: number) =>
+    `${friendlyName} must be exactly ${length} characters.`;
+
 export const TYPE = (friendlyName: string, expectedType: string) =>
     `Expected ${expectedType} for ${friendlyName.toLowerCase()}.`;
 
