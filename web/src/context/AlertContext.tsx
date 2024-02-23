@@ -1,6 +1,6 @@
 import type { Severity } from '@/models/alerts/IAlert';
 import type IAlert from '@/models/alerts/IAlert';
-import Queue from '@/models/queue/Queue';
+import TimedQueue from '@/models/queue/TimedQueue';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import { createContext, useState } from 'react';
@@ -9,6 +9,8 @@ import { BsExclamationCircle as ErrorIcon } from 'react-icons/bs';
 import { BsExclamationTriangle as WarningIcon } from 'react-icons/bs';
 import { BsCheck2Circle as SuccessIcon } from 'react-icons/bs';
 import { BsInfoCircle as InfoIcon } from 'react-icons/bs';
+
+const ALERT_TIME_SECONDS = 5;
 
 interface IAlertContext {
     addAlert: (message: string, severity: Severity) => void;
@@ -25,7 +27,9 @@ export interface AlertProviderProps {
 }
 
 const AlertProvider = ({ children }: AlertProviderProps) => {
-    const [alerts, setAlerts] = useState<Queue<IAlert>>(new Queue<IAlert>());
+    const [alerts, setAlerts] = useState<TimedQueue<IAlert>>(
+        new TimedQueue<IAlert>(ALERT_TIME_SECONDS),
+    );
 
     const addAlert = (
         message: string,
@@ -39,7 +43,7 @@ const AlertProvider = ({ children }: AlertProviderProps) => {
             icon,
             open: true,
         };
-        setAlerts((prevAlerts: Queue<IAlert>) => {
+        setAlerts((prevAlerts: TimedQueue<IAlert>) => {
             prevAlerts.enqueue(newAlert);
 
             return prevAlerts;
@@ -47,7 +51,7 @@ const AlertProvider = ({ children }: AlertProviderProps) => {
     };
 
     const removeAlert = () => {
-        setAlerts((prevAlerts: Queue<IAlert>) => {
+        setAlerts((prevAlerts: TimedQueue<IAlert>) => {
             prevAlerts.dequeue();
 
             return prevAlerts;
